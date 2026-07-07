@@ -364,7 +364,7 @@ function StreetCore({
       const k = e.key.toLowerCase();
       keysDown.current.add(k);
       if (k === 'v') setTpp((t) => !t);
-      if (k === 'c') void doCapture();
+      if (k === 'c') void doCaptureRef.current();
       if (k === 'm') setMapBig((b) => !b);
       if (k === 'escape') exitCountry();
     };
@@ -433,9 +433,13 @@ function StreetCore({
     const url =
       `https://maps.googleapis.com/maps/api/streetview?size=640x400&pano=${encodeURIComponent(panoId)}` +
       `&heading=${pov.heading.toFixed(1)}&pitch=${pov.pitch.toFixed(1)}&fov=${fov.toFixed(0)}&key=${mapsKey}`;
-    await capture(url, placeLabel);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [capture, placeLabel]);
+    // read the label straight from the panorama — the keydown handler holds a
+    // stale closure, so state would lag behind the player's real position
+    const loc = pano.getLocation();
+    await capture(url, loc?.shortDescription || loc?.description || spawn.label);
+  }, [capture, spawn.label]);
+  const doCaptureRef = useRef(doCapture);
+  doCaptureRef.current = doCapture;
 
   const teleportTo = useCallback(
     async (l: Landmark) => {

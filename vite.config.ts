@@ -6,5 +6,14 @@ export default defineConfig({
   plugins: [react(), tailwindcss()],
   build: {
     chunkSizeWarningLimit: 1600,
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          globe: ['globe.gl'],
+          geo: ['d3-geo', 'topojson-client', 'world-atlas/countries-110m.json'],
+          countries: ['world-countries'],
+        },
+      },
+    },
   },
 });

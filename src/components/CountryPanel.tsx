@@ -5,6 +5,7 @@ import { useAsync } from '../lib/useAsync';
 import { fetchCountryLive, fetchDishes, fetchEndemicSpecies, fetchLandmarks } from '../lib/wikidata';
 import { fetchFirstSummary, fetchWikiSummary } from '../lib/wikipedia';
 import { fetchWeather, seasonFor } from '../lib/weather';
+import { sfx } from '../lib/sfx';
 
 const UNAVAILABLE = <span className="text-sm font-semibold text-white/35">Data unavailable</span>;
 
@@ -359,7 +360,10 @@ export function CountryPanel() {
       {/* GO! */}
       <footer className="border-t border-white/10 p-3">
         <button
-          onClick={() => enterCountry(country.cca3)}
+          onClick={() => {
+            sfx.whoosh();
+            enterCountry(country.cca3);
+          }}
           className="w-full rounded-2xl bg-gradient-to-r from-coral-500 via-coral-400 to-amber-glow py-3.5 font-display text-2xl font-extrabold tracking-wide text-dusk-950 shadow-lg shadow-coral-600/40 transition hover:scale-[1.015] hover:shadow-coral-500/60"
         >
           GO! Step into {country.name} {country.flagEmoji}
