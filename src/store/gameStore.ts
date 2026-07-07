@@ -1,107 +1,150 @@
-import { create } from 'zustand';
-import { persist } from 'zustand/middleware';
+import { create } from "zustand";
+import type { GameState, Genre, StoryTurn } from "../types";
+import { startingState } from "../types";
+import { requestTurn } from "../lib/api";
 
-export type ViewMode = 'globe' | 'flat' | 'astro';
-export type CameraStyle = 'modern' | 'vintage' | 'retro';
+export const BEGIN_ACTION = "__begin_adventure__";
+const MAX_HISTORY = 8;
+const MAX_FACTS = 40;
+const SAVE_KEY = "isr-autosave-v1";
 
-export interface Player {
-  id: string;
-  nickname: string;
-  avatarId: string;
+interface SaveBlob {
+  v: 1;
+  game: GameState;
+  turn: StoryTurn | null;
 }
 
-export interface PhotoMeta {
-  id: string;
-  country: string;
-  cca2: string;
-  place: string;
-  style: CameraStyle;
-  takenAt: number;
+interface Store {
+  phase: "start" | "playing";
+  game: GameState | null;
+  turn: StoryTurn | null;
+  loading: boolean;
+  error: string | null;
+
+  startGame: (genre: Genre, name: string, charClass: string) => void;
+  takeTurn: (action: string) => Promise<void>;
+  retry: () => Promise<void>;
+  resetToStart: () => void;
+  exportSave: () => string | null;
+  importSave: (code: string) => boolean;
 }
 
-export const PHOTO_GOAL = 50;
-
-interface GameState {
-  player: Player | null;
-  viewMode: ViewMode;
-  selectedCca3: string | null;
-  insideCca3: string | null;
-  photos: PhotoMeta[];
-  visited: string[]; // cca3 of countries entered
-  albumOpen: boolean;
-  explorersOpen: boolean;
-  celebrated: boolean;
-  celebrationOpen: boolean;
-  cameraStyle: CameraStyle;
-  soundOn: boolean;
-
-  setPlayer: (p: Player) => void;
-  signOut: () => void;
-  setViewMode: (v: ViewMode) => void;
-  selectCountry: (cca3: string | null) => void;
-  enterCountry: (cca3: string) => void;
-  exitCountry: () => void;
-  addPhoto: (meta: PhotoMeta) => void;
-  removePhoto: (id: string) => void;
-  setAlbumOpen: (open: boolean) => void;
-  setExplorersOpen: (open: boolean) => void;
-  setCelebrationOpen: (open: boolean) => void;
-  setCameraStyle: (s: CameraStyle) => void;
-  toggleSound: () => void;
+/** First ~2 sentences (bounded) — used to summarize a turn into history. */
+function summarize(narrative: string, max = 240): string {
+  const clean = narrative.replace(/\s+/g, " ").trim();
+  const sentences = clean.match(/[^.!?]+[.!?]+/g);
+  const short = sentences ? sentences.slice(0, 2).join(" ") : clean;
+  return short.length > max ? short.slice(0, max - 1) + "…" : short;
 }
 
-export const useGame = create<GameState>()(
-  persist(
-    (set, get) => ({
-      player: null,
-      viewMode: 'globe',
-      selectedCca3: null,
-      insideCca3: null,
-      photos: [],
-      visited: [],
-      albumOpen: false,
-      explorersOpen: false,
-      celebrated: false,
-      celebrationOpen: false,
-      cameraStyle: 'modern',
-      soundOn: true,
+function applyUpdates(game: GameState, turn: StoryTurn, action: string): GameState {
+  const u = turn.stateUpdates ?? {};
+  const inventory = game.inventory
+    .filter((i) => !(u.removeItems ?? []).some((r) => r.toLowerCase() === i.toLowerCase()))
+    .concat(u.addItems ?? []);
+  const questLog = game.questLog.concat(u.newQuests ?? []);
+  const worldFacts = game.worldFacts.concat(u.newFacts ?? []).slice(-MAX_FACTS);
+  const hp = Math.max(0, Math.min(game.maxHp, game.hp + (u.hpDelta ?? 0)));
+  const history = game.history
+    .concat({
+      action: action === BEGIN_ACTION ? "The adventure began" : action,
+      summary: summarize(turn.narrative),
+    })
+    .slice(-MAX_HISTORY);
 
-      setPlayer: (player) => set({ player }),
-      signOut: () => set({ player: null, insideCca3: null, selectedCca3: null }),
-      setViewMode: (viewMode) => set({ viewMode }),
-      selectCountry: (selectedCca3) => set({ selectedCca3 }),
-      enterCountry: (cca3) =>
-        set((s) => ({
-          insideCca3: cca3,
-          visited: s.visited.includes(cca3) ? s.visited : [...s.visited, cca3],
-        })),
-      exitCountry: () => set({ insideCca3: null }),
-      addPhoto: (meta) => {
-        const next = [meta, ...get().photos];
-        const reachedGoal = next.length >= PHOTO_GOAL && !get().celebrated;
-        set({
-          photos: next,
-          ...(reachedGoal ? { celebrated: true, celebrationOpen: true } : {}),
-        });
-      },
-      removePhoto: (id) => set((s) => ({ photos: s.photos.filter((p) => p.id !== id) })),
-      setAlbumOpen: (albumOpen) => set({ albumOpen }),
-      setExplorersOpen: (explorersOpen) => set({ explorersOpen }),
-      setCelebrationOpen: (celebrationOpen) => set({ celebrationOpen }),
-      setCameraStyle: (cameraStyle) => set({ cameraStyle }),
-      toggleSound: () => set((s) => ({ soundOn: !s.soundOn })),
-    }),
-    {
-      name: 'wanderworld',
-      partialize: (s) => ({
-        player: s.player,
-        photos: s.photos,
-        visited: s.visited,
-        celebrated: s.celebrated,
-        viewMode: s.viewMode,
-        cameraStyle: s.cameraStyle,
-        soundOn: s.soundOn,
-      }),
-    },
-  ),
-);
+  return {
+    ...game,
+    hp,
+    inventory,
+    questLog,
+    worldFacts,
+    location: u.location?.trim() ? u.location : game.location,
+    history,
+  };
+}
+
+function autosave(game: GameState | null, turn: StoryTurn | null) {
+  try {
+    if (game) localStorage.setItem(SAVE_KEY, JSON.stringify({ v: 1, game, turn } satisfies SaveBlob));
+    else localStorage.removeItem(SAVE_KEY);
+  } catch {
+    /* storage unavailable — in-memory state still works */
+  }
+}
+
+let lastAction: string | null = null;
+
+export const useGame = create<Store>((set, get) => ({
+  phase: "start",
+  game: null,
+  turn: null,
+  loading: false,
+  error: null,
+
+  startGame(genre, name, charClass) {
+    const game = startingState(genre, name.trim() || "The Nameless One", charClass);
+    set({ phase: "playing", game, turn: null, error: null });
+    void get().takeTurn(BEGIN_ACTION);
+  },
+
+  async takeTurn(action) {
+    const { game, loading } = get();
+    if (!game || loading) return;
+    lastAction = action;
+    set({ loading: true, error: null });
+    try {
+      const turn = await requestTurn(game, action);
+      const next = applyUpdates(game, turn, action);
+      set({ game: next, turn, loading: false });
+      autosave(next, turn);
+    } catch (err) {
+      set({
+        loading: false,
+        error: err instanceof Error ? err.message : "The DM lost their train of thought.",
+      });
+    }
+  },
+
+  async retry() {
+    if (lastAction) await get().takeTurn(lastAction);
+  },
+
+  resetToStart() {
+    lastAction = null;
+    autosave(null, null);
+    set({ phase: "start", game: null, turn: null, loading: false, error: null });
+  },
+
+  exportSave() {
+    const { game, turn } = get();
+    if (!game) return null;
+    const blob: SaveBlob = { v: 1, game, turn };
+    return btoa(unescape(encodeURIComponent(JSON.stringify(blob))));
+  },
+
+  importSave(code) {
+    try {
+      const blob = JSON.parse(decodeURIComponent(escape(atob(code.trim())))) as SaveBlob;
+      if (blob.v !== 1 || !blob.game?.character?.name) return false;
+      set({ phase: "playing", game: blob.game, turn: blob.turn, loading: false, error: null });
+      autosave(blob.game, blob.turn);
+      return true;
+    } catch {
+      return false;
+    }
+  },
+}));
+
+/** Restore autosave on load (called once from App). */
+export function loadAutosave(): boolean {
+  try {
+    const raw = localStorage.getItem(SAVE_KEY);
+    if (!raw) return false;
+    const blob = JSON.parse(raw) as SaveBlob;
+    if (blob.v !== 1 || !blob.game?.character?.name) return false;
+    useGame.setState({ phase: "playing", game: blob.game, turn: blob.turn });
+    return true;
+  } catch {
+    return false;
+  }
+}
