@@ -2,6 +2,8 @@
 // Runs ONLY server-side (Vercel function + Vite dev middleware). The
 // Anthropic API key never reaches the browser.
 
+import { freeTurn } from "./freeStoryteller";
+
 // Swap to "claude-sonnet-5" for richer prose ($3/$15 per MTok vs $1/$5).
 // Can also be overridden without a code change via the DM_MODEL env var.
 export const DM_MODEL = "claude-haiku-4-5";
@@ -10,8 +12,10 @@ const ANTHROPIC_URL = "https://api.anthropic.com/v1/messages";
 const MAX_TOKENS = 2048;
 
 // ── Wire types (server-side copies; src/types.ts mirrors these) ──────────
-interface GameState {
+export interface GameState {
   genre: string;
+  /** Which storyteller runs the game: Claude (needs API key) or the free procedural engine. */
+  dm: "claude" | "free";
   character: { name: string; class: string; traits: string[] };
   hp: number;
   maxHp: number;
@@ -36,7 +40,8 @@ export interface StoryTurn {
   choices: string[];
   imagePrompt: string;
   stateUpdates: StateUpdates;
-  mock?: boolean;
+  /** Which engine produced this turn. */
+  engine: "claude" | "free";
 }
 
 export interface HandlerResult {
@@ -149,6 +154,7 @@ export function sanitizeState(raw: unknown): GameState | null {
 
   return {
     genre,
+    dm: r.dm === "free" ? "free" : "claude",
     character: { name, class: clampStr(ch.class, 60), traits: clampArr(ch.traits, 8, 60) },
     hp,
     maxHp,
@@ -181,6 +187,7 @@ export function parseTurnJson(text: string): StoryTurn | null {
     const u = (o.stateUpdates ?? {}) as Record<string, unknown>;
     const hpDeltaRaw = typeof u.hpDelta === "number" ? Math.round(u.hpDelta) : 0;
     return {
+      engine: "claude",
       narrative: o.narrative.trim(),
       choices,
       imagePrompt: clampStr(o.imagePrompt, 400),
@@ -246,30 +253,6 @@ function friendlyApiError(status: number, msg: string): HandlerResult {
   return { status: 502, body: { error: `The DM stumbled: ${msg}` } };
 }
 
-// ── Offline mock mode (no API key) ────────────────────────────────────────
-// Clearly labeled — no story content is passed off as model output.
-function mockTurn(state: GameState, playerAction: string): StoryTurn {
-  const opening = playerAction === BEGIN_ACTION;
-  const label = "[Offline mock mode — no ANTHROPIC_API_KEY configured. This placeholder proves the game loop; the real DM writes the story once you add a key to .env.]";
-  const narrative = opening
-    ? `${label}\n\nYou stand at a crossroads in a ${state.genre} realm that has not yet been imagined. A signpost creaks in the wind, its arms blank, waiting for a storyteller.\n\nThe engine, the state, the choices — all of it works. Only the imagination is missing, and that arrives with your API key.`
-    : `${label}\n\nYou attempt to "${playerAction}". The blank world nods politely and records your deed. Somewhere beyond the fourth wall, a real dungeon master is waiting to be summoned.`;
-  return {
-    narrative,
-    choices: ["Press onward", "Examine the signpost", "Wait for the storyteller", "Shout into the void"],
-    imagePrompt: "A lone traveler at a blank signpost in an unfinished, half-sketched world",
-    stateUpdates: {
-      hpDelta: 0,
-      addItems: opening ? ["Blank map (mock)"] : [],
-      removeItems: [],
-      newQuests: opening ? ["Add ANTHROPIC_API_KEY to .env to awaken the DM"] : [],
-      newFacts: [],
-      location: opening ? "The Unwritten Crossroads" : state.location,
-    },
-    mock: true,
-  };
-}
-
 // ── Main handler (framework-agnostic) ─────────────────────────────────────
 export async function handleStory(rawBody: unknown, env: Env): Promise<HandlerResult> {
   const body = (rawBody ?? {}) as Record<string, unknown>;
@@ -280,8 +263,10 @@ export async function handleStory(rawBody: unknown, env: Env): Promise<HandlerRe
   }
 
   const apiKey = env.ANTHROPIC_API_KEY?.trim();
-  if (!apiKey) {
-    return { status: 200, body: mockTurn(state, playerAction) };
+  // Free storyteller: chosen explicitly ($0, no key needed), and also the
+  // fallback when no ANTHROPIC_API_KEY is configured.
+  if (state.dm === "free" || !apiKey) {
+    return { status: 200, body: freeTurn(state, playerAction, BEGIN_ACTION) };
   }
 
   const model = env.DM_MODEL?.trim() || DM_MODEL;
@@ -330,6 +315,7 @@ export async function handleStory(rawBody: unknown, env: Env): Promise<HandlerRe
 /** In-world handling when safety classifiers decline an action. */
 function refusalTurn(state: GameState): StoryTurn {
   return {
+    engine: "claude",
     narrative:
       "A strange hush falls over the world. Whatever you just attempted, the fates refuse to weave it into this tale.\n\nThe moment passes, and the realm waits for a different choice.",
     choices: ["Take a breath and reconsider", "Survey your surroundings", "Continue on your way"],

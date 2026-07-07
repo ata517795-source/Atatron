@@ -43,14 +43,19 @@ export default function PlayScreen() {
           </button>
         </header>
 
-        {turn?.mock && (
+        {turn?.engine === "free" && game.dm === "claude" && (
           <div
             className="mb-3 text-xs px-3 py-2 rounded-md border"
             style={{ borderColor: "var(--accent)", color: "var(--accent)", background: "var(--accent-soft)" }}
           >
-            Offline mock mode — no ANTHROPIC_API_KEY configured. Add one to .env and restart to
-            summon the real DM.
+            The server has no ANTHROPIC_API_KEY, so the free storyteller is running this tale.
+            Add a key to .env and restart to summon the Claude DM.
           </div>
+        )}
+        {turn?.engine === "free" && game.dm === "free" && (
+          <p className="mb-3 text-[11px] uppercase tracking-[0.15em]" style={{ color: "var(--ink-dim)" }}>
+            Free storyteller mode · $0 · no AI
+          </p>
         )}
 
         <SceneCard turn={turn} />

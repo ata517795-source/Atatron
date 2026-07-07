@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import type { GameState, Genre, StoryTurn } from "../types";
+import type { DmMode, GameState, Genre, StoryTurn } from "../types";
 import { startingState } from "../types";
 import { requestTurn } from "../lib/api";
 
@@ -21,7 +21,7 @@ interface Store {
   loading: boolean;
   error: string | null;
 
-  startGame: (genre: Genre, name: string, charClass: string) => void;
+  startGame: (genre: Genre, name: string, charClass: string, dm: DmMode) => void;
   takeTurn: (action: string) => Promise<void>;
   retry: () => Promise<void>;
   resetToStart: () => void;
@@ -81,8 +81,8 @@ export const useGame = create<Store>((set, get) => ({
   loading: false,
   error: null,
 
-  startGame(genre, name, charClass) {
-    const game = startingState(genre, name.trim() || "The Nameless One", charClass);
+  startGame(genre, name, charClass, dm) {
+    const game = startingState(genre, name.trim() || "The Nameless One", charClass, dm);
     set({ phase: "playing", game, turn: null, error: null });
     void get().takeTurn(BEGIN_ACTION);
   },

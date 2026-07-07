@@ -17,16 +17,20 @@ cp .env.example .env        # then paste your Anthropic API key into .env
 npm run dev                 # → http://localhost:5173
 ```
 
-Get a key at [console.anthropic.com](https://console.anthropic.com) and set it in `.env`:
+**Playing for free ($0, no API key):** pick **"Free storyteller"** on the start
+screen. It's a built-in procedural story engine — each adventure derives a real
+arc (a villain, a treasure, a destination) from seeded random tables per genre,
+with encounters, hazards, discoveries, rest, and a climax. It costs nothing,
+needs no key, and is also the automatic fallback whenever the server has no
+`ANTHROPIC_API_KEY`. It's honestly labeled in the UI (`Free storyteller mode ·
+$0 · no AI`) — for truly infinite, improvised stories, use the Claude DM.
+
+**Playing with the Claude DM:** get a key at
+[console.anthropic.com](https://console.anthropic.com) and set it in `.env`:
 
 ```
 ANTHROPIC_API_KEY=sk-ant-...
 ```
-
-**No key yet?** The app still runs — `/api/story` answers in a clearly-labeled
-**offline mock mode** so you can exercise the whole game loop (choices, HP,
-inventory, quests, saves). Add the key and restart to summon the real DM.
-Nothing else changes; the mock and live paths share the same code.
 
 ## How it's built
 
@@ -35,6 +39,7 @@ src/                      React 19 + Vite + TypeScript + Tailwind 4 + Zustand
 api/story.ts              Vercel serverless function → thin wrapper
 api/image.ts              Optional scene-art proxy (stub until you pick a provider)
 api/_lib/storyCore.ts     The DM engine: prompt, Anthropic call, strict-JSON parsing
+api/_lib/freeStoryteller.ts  The $0 procedural engine (no key, no AI)
 vite.config.ts            Dev middleware mounts the SAME api/_lib handlers locally,
                           so `npm run dev` runs the identical server logic as prod
 ```
@@ -90,9 +95,10 @@ or override without touching code via the `DM_MODEL` env var.
 A typical turn is ~1,000–1,500 input tokens (system prompt + game state) and
 ~400–800 output tokens (narrative + choices + updates):
 
-| Model | Pricing (per MTok in/out) | ≈ Cost per turn | ≈ Turns per $1 |
+| Storyteller | Pricing (per MTok in/out) | ≈ Cost per turn | ≈ Turns per $1 |
 |---|---|---|---|
-| `claude-haiku-4-5` (default) | $1 / $5 | $0.004–0.005 | ~200–250 |
+| **Free storyteller** (procedural, no AI) | — | $0 | ∞ |
+| `claude-haiku-4-5` (default Claude DM) | $1 / $5 | $0.004–0.005 | ~200–250 |
 | `claude-sonnet-5` | $3 / $15 (intro $2 / $10 through 2026-08-31) | $0.012–0.015 | ~70–85 |
 
 Estimates only — long inventories/quest logs push input tokens up slightly.

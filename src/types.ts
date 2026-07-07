@@ -4,6 +4,9 @@
 export const GENRES = ["fantasy", "sci-fi", "mystery", "pirate", "post-apoc"] as const;
 export type Genre = (typeof GENRES)[number];
 
+/** Which storyteller runs the game. */
+export type DmMode = "claude" | "free";
+
 export interface Character {
   name: string;
   class: string;
@@ -18,6 +21,7 @@ export interface HistoryEntry {
 /** Full game state — kept client-side, sent to /api/story every turn. */
 export interface GameState {
   genre: Genre;
+  dm: DmMode;
   character: Character;
   hp: number;
   maxHp: number;
@@ -43,8 +47,8 @@ export interface StoryTurn {
   choices: string[];
   imagePrompt: string;
   stateUpdates: StateUpdates;
-  /** True when the server answered from offline mock mode (no API key). */
-  mock?: boolean;
+  /** Which engine produced this turn. */
+  engine?: DmMode;
 }
 
 export interface GenreMeta {
@@ -87,9 +91,10 @@ export const GENRE_META: GenreMeta[] = [
   },
 ];
 
-export function startingState(genre: Genre, name: string, charClass: string): GameState {
+export function startingState(genre: Genre, name: string, charClass: string, dm: DmMode): GameState {
   return {
     genre,
+    dm,
     character: { name, class: charClass, traits: [] },
     hp: 100,
     maxHp: 100,
