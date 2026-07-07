@@ -291,7 +291,7 @@ export function freeTurn(state: GameState, playerAction: string, beginAction: st
   if (wantsClimax) return climaxTurn(state, bank, arc, rng);
 
   const resting = /rest|camp|sleep|shelter|heal|recover/i.test(action);
-  if (resting && state.hp < state.maxHp) return restTurn(state, bank, arc, rng, action);
+  if (resting && state.hp < state.maxHp) return restTurn(state, bank, arc, rng, action, stage);
 
   // Directed travel: if the action names a known place, actually go there.
   const namedPlace = [...bank.places]
@@ -304,9 +304,9 @@ export function freeTurn(state: GameState, playerAction: string, beginAction: st
   // Weighted episode table; wounded players see fewer hazards.
   const roll = rng();
   const hazardCut = state.hp < 30 ? 0.12 : 0.25;
-  if (roll < hazardCut) return hazardTurn(state, bank, arc, rng, action);
+  if (roll < hazardCut) return hazardTurn(state, bank, arc, rng, action, stage);
   if (roll < 0.5) return npcTurn(state, bank, arc, rng, action, stage);
-  if (roll < 0.68) return discoveryTurn(state, bank, arc, rng, action);
+  if (roll < 0.68) return discoveryTurn(state, bank, arc, rng, action, stage);
   return travelTurn(state, bank, arc, rng, action, stage);
 }
 
@@ -419,7 +419,7 @@ function npcTurn(state: GameState, bank: Bank, arc: Arc, rng: () => number, acti
   };
 }
 
-function discoveryTurn(state: GameState, bank: Bank, arc: Arc, rng: () => number, action: string): StoryTurn {
+function discoveryTurn(state: GameState, bank: Bank, arc: Arc, rng: () => number, action: string, stage: string): StoryTurn {
   const item = pick(rng, bank.items.filter((i) => !state.inventory.includes(i)));
   return {
     ...FREE,
@@ -427,13 +427,13 @@ function discoveryTurn(state: GameState, bank: Bank, arc: Arc, rng: () => number
       `${ack(action)} Patience pays: tucked where only the thorough would look, you find ${item}.`,
       `${pick(rng, bank.moods)} Small victories keep the long road honest.`,
     ].join("\n\n"),
-    choices: baseChoices(bank, arc, rng, state, "mid"),
+    choices: baseChoices(bank, arc, rng, state, stage),
     imagePrompt: `A hand uncovering ${item} in ${state.location}, close-up, ${state.genre} tones`,
     stateUpdates: { ...emptyUpdates(), addItems: [item], newFacts: [`Found ${item} near ${state.location}`] },
   };
 }
 
-function hazardTurn(state: GameState, bank: Bank, arc: Arc, rng: () => number, action: string): StoryTurn {
+function hazardTurn(state: GameState, bank: Bank, arc: Arc, rng: () => number, action: string, stage: string): StoryTurn {
   const hazard = pick(rng, bank.hazards);
   const dmg = -range(rng, 8, 18);
   const loseItem = state.inventory.length > 2 && rng() < 0.25;
@@ -444,13 +444,13 @@ function hazardTurn(state: GameState, bank: Bank, arc: Arc, rng: () => number, a
       `${ack(action)} Then the world objects. ${hazard}.`,
       `You come through it breathing — barely${lost ? ` — and ${lost} does not come with you` : ""}. ${pick(rng, bank.moods)}`,
     ].join("\n\n"),
-    choices: baseChoices(bank, arc, rng, state, "mid"),
+    choices: baseChoices(bank, arc, rng, state, stage),
     imagePrompt: `A moment of sudden danger at ${state.location}, motion and chaos, ${state.genre} style`,
     stateUpdates: { ...emptyUpdates(), hpDelta: dmg, removeItems: lost ? [lost] : [], newFacts: [`Survived danger at ${state.location}`] },
   };
 }
 
-function restTurn(state: GameState, bank: Bank, arc: Arc, rng: () => number, action: string): StoryTurn {
+function restTurn(state: GameState, bank: Bank, arc: Arc, rng: () => number, action: string, stage: string): StoryTurn {
   const shelter = pick(rng, bank.shelters);
   const heal = range(rng, 12, 22);
   return {
@@ -459,7 +459,7 @@ function restTurn(state: GameState, bank: Bank, arc: Arc, rng: () => number, act
       `${ack(action)} You find ${shelter} and let the hours do their quiet work. Wounds close; thoughts settle.`,
       `${pick(rng, bank.moods)} Somewhere out there, ${arc.villain} isn't resting. Best not to linger.`,
     ].join("\n\n"),
-    choices: baseChoices(bank, arc, rng, state, "mid"),
+    choices: baseChoices(bank, arc, rng, state, stage),
     imagePrompt: `A weary traveler resting in ${shelter}, warm light against darkness`,
     stateUpdates: { ...emptyUpdates(), hpDelta: heal },
   };
