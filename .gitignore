@@ -9,6 +9,9 @@ dist/
 .env.local
 .env.*.local
 
+# Vercel
+.vercel/
+
 # Editor / OS
 .DS_Store
 *.log
