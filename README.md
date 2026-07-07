@@ -21,9 +21,35 @@ That's it. **The game is fully playable with an empty `.env`** — without a Goo
 Maps key, "GO!" mode gracefully falls back to exploring real landmark photos from
 Wikimedia Commons instead of Street View.
 
+### 🚶 Unlock the real walkable Street View (5 minutes, free)
+
+The headline experience — steering your explorer through real Google Street View,
+walking panorama-to-panorama like a travel game — needs one free API key:
+
+1. Go to the [Google Cloud Console](https://console.cloud.google.com/) and create
+   a project (or pick an existing one).
+2. **APIs & Services → Enable APIs** → enable **Maps JavaScript API** and
+   **Street View Static API**.
+3. **APIs & Services → Credentials → Create credentials → API key**. Copy it.
+4. Enable **Billing** on the project (Google requires a card, but gives a large
+   free monthly quota — casual play stays well within it). Then, recommended:
+   restrict the key to your domain (HTTP referrers) and to those two APIs.
+5. Paste it into `.env`:
+   ```
+   VITE_GOOGLE_MAPS_API_KEY=your_key_here
+   ```
+6. Restart `npm run dev`. Now **GO!** drops you into live Street View: `W`/`S` walk,
+   `A`/`D` turn, hold `R` to run, drag to look, `C` to photograph — with your
+   explorer visible in third person, walking the real street.
+
+Your explorer character, the album, filters, and the whole world map all work
+with or without the key — the key only swaps the photo-fallback for the real
+walkable Street View.
+
 ## How to play
 
-1. **Sign in** with a nickname and pick one of 12 original Wanderworld avatars.
+1. **Sign in** with a nickname and pick one of 8 original Wanderworld explorers —
+   full-body traveller figures you'll steer through the world in third person.
 2. **Pick a country** in one of three world views (toggle in the header):
    - 🌍 **Globe** — rotatable/zoomable 3D Earth, every country tinted its own color
    - 🗺️ **Map** — flat D3 choropleth with labels and horizontal panning
@@ -150,9 +176,15 @@ CLI alternative: `npm i -g vercel && vercel --prod`.
 
 - Street View is **real Google imagery of the real world**, labeled as such
   in-app — Wanderworld does not pretend it's a rendered game world.
-- All avatars are **original Wanderworld characters** (hand-drawn SVG). No
-  Marvel/Disney/etc. characters — that's copyrighted material we can't use;
-  if you want "like Spider-Man", we can add an original look-alike hero instead.
+- All explorer characters are **original Wanderworld figures** (hand-drawn,
+  procedurally animated SVG — a real walk/run/photo gait, seen in third person).
+  No Marvel/Disney/etc. characters — that's copyrighted material we can't use;
+  if you want a specific branded character, we can add an original look-alike.
+- The third-person character is a polished overlay on top of Street View's real
+  photography. It walks *through* the scene as you move panorama to panorama; it
+  isn't depth-composited behind real-world objects (Street View exposes no depth
+  data for that), so treat it as your on-screen adventurer, not a physical actor
+  in the photo.
 - All sound effects are synthesized in the browser with WebAudio — no audio assets.
 - Country dataset: ODbL (mledoze/countries). Landmark/wildlife/dish photos:
   Wikimedia Commons (various free licenses — each image links back to its source).
@@ -173,7 +205,7 @@ src/
     googleMaps.ts          key-gated Maps loader + panorama finder
     capture.ts             canvas photo pipeline (filters, polaroid, IndexedDB)
     supabase.ts            env-guarded explorers client
-    avatars.tsx            12 original SVG avatars
+    avatars.tsx            8 original explorer characters (portrait + animated walk)
     sfx.ts                 WebAudio sound effects
   components/
     Landing.tsx            nickname + avatar picker

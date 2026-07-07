@@ -1,211 +1,367 @@
 /**
- * Original avatar art — hand-drawn SVG characters created for Wanderworld.
- * No copyrighted characters; everything below is drawn from scratch.
+ * Original explorer characters for Wanderworld — realistic traveller figures
+ * drawn from scratch as layered SVG (no copyrighted characters).
+ *
+ * Three renderings share one palette:
+ *   • AvatarIcon    — front head-and-shoulders portrait (picker + header)
+ *   • ExplorerStanding — front full figure (picker preview)
+ *   • WalkingExplorer  — back-view full body, JS-animated walk / run / photo
  */
-import type { JSX } from 'react';
+import { useEffect, useRef } from 'react';
+
+export type Gait = 'idle' | 'walk' | 'run' | 'photo';
 
 export interface AvatarDef {
   id: string;
   name: string;
-  kind: 'animal' | 'hero';
+  kind: 'explorer';
+  skin: string;
+  skinShade: string;
+  hair: string;
+  hairStyle: 'short' | 'bun' | 'ponytail' | 'curly';
+  hat: 'none' | 'cap' | 'brim' | 'beanie';
+  hatColor: string;
+  jacket: string;
+  jacketShade: string;
+  pants: string;
+  pack: string;
+  packAccent: string;
+  shoe: string;
   bg: string;
 }
 
-const Eyes = ({ y = 30, dx = 9, r = 3.2, color = '#1f2430' }: { y?: number; dx?: number; r?: number; color?: string }) => (
-  <>
-    <circle cx={32 - dx} cy={y} r={r} fill={color} />
-    <circle cx={32 + dx} cy={y} r={r} fill={color} />
-    <circle cx={32 - dx + 1.2} cy={y - 1.2} r={1} fill="#fff" />
-    <circle cx={32 + dx + 1.2} cy={y - 1.2} r={1} fill="#fff" />
-  </>
-);
-
-const Smile = ({ y = 40, w = 7, color = '#1f2430' }: { y?: number; w?: number; color?: string }) => (
-  <path d={`M ${32 - w} ${y} Q 32 ${y + 5} ${32 + w} ${y}`} stroke={color} strokeWidth="2" fill="none" strokeLinecap="round" />
-);
-
-const faces: Record<string, JSX.Element> = {
-  fox: (
-    <>
-      <path d="M14 22 L10 8 L24 15 Z" fill="#e86b3f" />
-      <path d="M50 22 L54 8 L40 15 Z" fill="#e86b3f" />
-      <path d="M14 22 L12 12 L22 17 Z" fill="#fbe5d6" />
-      <path d="M50 22 L52 12 L42 17 Z" fill="#fbe5d6" />
-      <circle cx="32" cy="34" r="20" fill="#f07b47" />
-      <path d="M32 54 A20 20 0 0 0 52 36 Q 42 52 32 54" fill="#e86b3f" opacity="0.5" />
-      <ellipse cx="32" cy="43" rx="11" ry="9" fill="#fbe5d6" />
-      <Eyes y={31} />
-      <ellipse cx="32" cy="41" rx="3" ry="2.4" fill="#3b2b23" />
-      <Smile y={46} w={5} />
-    </>
-  ),
-  panda: (
-    <>
-      <circle cx="15" cy="16" r="8" fill="#2b2b33" />
-      <circle cx="49" cy="16" r="8" fill="#2b2b33" />
-      <circle cx="32" cy="34" r="20" fill="#f7f4ef" />
-      <ellipse cx="23" cy="31" rx="6" ry="7.5" fill="#2b2b33" transform="rotate(-15 23 31)" />
-      <ellipse cx="41" cy="31" rx="6" ry="7.5" fill="#2b2b33" transform="rotate(15 41 31)" />
-      <Eyes y={31} r={2.4} color="#fff" />
-      <circle cx="23" cy="31" r="1.2" fill="#1f2430" />
-      <circle cx="41" cy="31" r="1.2" fill="#1f2430" />
-      <ellipse cx="32" cy="41" rx="3" ry="2.2" fill="#2b2b33" />
-      <Smile y={45} w={5} />
-    </>
-  ),
-  owl: (
-    <>
-      <path d="M15 15 L20 6 L25 15 Z" fill="#8a5a33" />
-      <path d="M49 15 L44 6 L39 15 Z" fill="#8a5a33" />
-      <circle cx="32" cy="34" r="20" fill="#a06c3e" />
-      <circle cx="23" cy="31" r="9" fill="#f3e3c3" />
-      <circle cx="41" cy="31" r="9" fill="#f3e3c3" />
-      <circle cx="23" cy="31" r="4" fill="#2b2415" />
-      <circle cx="41" cy="31" r="4" fill="#2b2415" />
-      <circle cx="24.4" cy="29.6" r="1.3" fill="#fff" />
-      <circle cx="42.4" cy="29.6" r="1.3" fill="#fff" />
-      <path d="M32 36 L28 42 L36 42 Z" fill="#f0a03c" />
-      <path d="M20 48 Q 32 54 44 48" stroke="#7c5028" strokeWidth="2.5" fill="none" strokeLinecap="round" />
-    </>
-  ),
-  penguin: (
-    <>
-      <circle cx="32" cy="33" r="20" fill="#28303f" />
-      <ellipse cx="32" cy="38" rx="13" ry="12" fill="#f2f5f7" />
-      <Eyes y={30} dx={8} />
-      <path d="M32 33 L26 39 L38 39 Z" fill="#f5a13c" />
-      <path d="M27 42 Q 32 45 37 42" stroke="#d8862c" strokeWidth="2" fill="none" strokeLinecap="round" />
-    </>
-  ),
-  lion: (
-    <>
-      <circle cx="32" cy="33" r="24" fill="#c96f2f" />
-      <circle cx="32" cy="33" r="24" fill="none" stroke="#a85723" strokeWidth="2" strokeDasharray="4 3" />
-      <circle cx="32" cy="34" r="17" fill="#f2b04a" />
-      <circle cx="17" cy="20" r="4.5" fill="#f2b04a" />
-      <circle cx="47" cy="20" r="4.5" fill="#f2b04a" />
-      <Eyes y={31} dx={8} />
-      <ellipse cx="32" cy="39" rx="3.4" ry="2.6" fill="#6b3d1e" />
-      <path d="M32 41 L32 45 M32 45 Q 27 49 24 45 M32 45 Q 37 49 40 45" stroke="#6b3d1e" strokeWidth="2" fill="none" strokeLinecap="round" />
-    </>
-  ),
-  frog: (
-    <>
-      <circle cx="20" cy="16" r="8" fill="#57b656" />
-      <circle cx="44" cy="16" r="8" fill="#57b656" />
-      <circle cx="20" cy="15" r="4.5" fill="#fff" />
-      <circle cx="44" cy="15" r="4.5" fill="#fff" />
-      <circle cx="20" cy="15" r="2.2" fill="#1f2430" />
-      <circle cx="44" cy="15" r="2.2" fill="#1f2430" />
-      <path d="M12 34 a20 18 0 1 0 40 0 a20 15 0 0 0 -40 0" fill="#63c261" />
-      <circle cx="24" cy="33" r="2" fill="#3c8f42" />
-      <circle cx="40" cy="33" r="2" fill="#3c8f42" />
-      <path d="M22 41 Q 32 49 42 41" stroke="#2e6f33" strokeWidth="2.5" fill="none" strokeLinecap="round" />
-    </>
-  ),
-  koala: (
-    <>
-      <circle cx="13" cy="22" r="10" fill="#9aa3b2" />
-      <circle cx="51" cy="22" r="10" fill="#9aa3b2" />
-      <circle cx="13" cy="22" r="5" fill="#e8b7c4" />
-      <circle cx="51" cy="22" r="5" fill="#e8b7c4" />
-      <circle cx="32" cy="34" r="19" fill="#aeb7c5" />
-      <Eyes y={31} dx={9} />
-      <ellipse cx="32" cy="39" rx="4.5" ry="6" fill="#3a3f4a" />
-      <Smile y={49} w={5} />
-    </>
-  ),
-  cat: (
-    <>
-      <path d="M14 24 L11 8 L26 14 Z" fill="#7d6bd9" />
-      <path d="M50 24 L53 8 L38 14 Z" fill="#7d6bd9" />
-      <path d="M15 21 L13.5 12 L22 15.5 Z" fill="#f3c9e0" />
-      <path d="M49 21 L50.5 12 L42 15.5 Z" fill="#f3c9e0" />
-      <circle cx="32" cy="34" r="20" fill="#8f7ee6" />
-      <Eyes y={32} />
-      <path d="M32 38 L29.5 41 L34.5 41 Z" fill="#f3c9e0" />
-      <path d="M32 41 Q 28 45 25 42 M32 41 Q 36 45 39 42" stroke="#4d3f8f" strokeWidth="2" fill="none" strokeLinecap="round" />
-      <path d="M12 36 L22 37 M12 42 L22 41 M52 36 L42 37 M52 42 L42 41" stroke="#e6ddff" strokeWidth="1.5" strokeLinecap="round" />
-    </>
-  ),
-  explorer: (
-    <>
-      <circle cx="32" cy="36" r="17" fill="#eeb98c" />
-      <path d="M10 26 Q 32 20 54 26 L 54 30 Q 32 25 10 30 Z" fill="#b98a4e" />
-      <path d="M16 26 Q 16 10 32 10 Q 48 10 48 26 Q 32 21 16 26" fill="#cfa05e" />
-      <path d="M16 24 Q 32 19 48 24" stroke="#8f6a35" strokeWidth="2.5" fill="none" />
-      <Eyes y={36} dx={7} />
-      <Smile y={44} w={6} />
-      <circle cx="32" cy="13" r="1.6" fill="#8f6a35" />
-    </>
-  ),
-  astronaut: (
-    <>
-      <circle cx="32" cy="32" r="22" fill="#e9edf5" />
-      <circle cx="32" cy="32" r="15" fill="#25304a" />
-      <circle cx="32" cy="34" r="12" fill="#eeb98c" />
-      <Eyes y={32} dx={6} />
-      <Smile y={39} w={5} />
-      <path d="M14 32 a18 18 0 0 1 36 0" fill="none" stroke="#ffb347" strokeWidth="2.5" />
-      <circle cx="52" cy="40" r="3" fill="#ff6b57" />
-      <circle cx="12" cy="40" r="3" fill="#ff6b57" />
-    </>
-  ),
-  aviator: (
-    <>
-      <circle cx="32" cy="36" r="17" fill="#eeb98c" />
-      <path d="M15 34 Q 15 13 32 13 Q 49 13 49 34 L 44 34 Q 44 22 32 22 Q 20 22 20 34 Z" fill="#8a5a33" />
-      <rect x="17" y="27" width="30" height="9" rx="4.5" fill="#5b442a" />
-      <circle cx="25" cy="31.5" r="5" fill="#cfe3f0" stroke="#3e2f1d" strokeWidth="2" />
-      <circle cx="39" cy="31.5" r="5" fill="#cfe3f0" stroke="#3e2f1d" strokeWidth="2" />
-      <Smile y={45} w={6} />
-      <path d="M12 33 L17 30 M52 33 L47 30" stroke="#8a5a33" strokeWidth="3" strokeLinecap="round" />
-    </>
-  ),
-  captain: (
-    <>
-      <circle cx="32" cy="37" r="16" fill="#eeb98c" />
-      <path d="M14 28 Q 32 22 50 28 L 50 32 Q 32 27 14 32 Z" fill="#1f2a44" />
-      <path d="M18 28 Q 18 14 32 14 Q 46 14 46 28 Q 32 23 18 28" fill="#f2f5f7" />
-      <path d="M18 27 Q 32 22 46 27" stroke="#d9b64c" strokeWidth="2" fill="none" />
-      <circle cx="32" cy="18" r="2.4" fill="#d9b64c" />
-      <Eyes y={36} dx={7} />
-      <path d="M24 45 Q 32 51 40 45 Q 36 48 32 48 Q 28 48 24 45" fill="#e5e9ee" />
-      <Smile y={44} w={4} />
-    </>
-  ),
-};
-
 export const AVATARS: AvatarDef[] = [
-  { id: 'fox', name: 'Fennec the Fox', kind: 'animal', bg: '#3d2a5e' },
-  { id: 'panda', name: 'Bamboo the Panda', kind: 'animal', bg: '#2a4a5e' },
-  { id: 'owl', name: 'Atlas the Owl', kind: 'animal', bg: '#2f3d63' },
-  { id: 'penguin', name: 'Pip the Penguin', kind: 'animal', bg: '#274a63' },
-  { id: 'lion', name: 'Sol the Lion', kind: 'animal', bg: '#5e3a2a' },
-  { id: 'frog', name: 'Hopscotch the Frog', kind: 'animal', bg: '#254a3a' },
-  { id: 'koala', name: 'Kip the Koala', kind: 'animal', bg: '#3a4258' },
-  { id: 'cat', name: 'Nova the Cat', kind: 'animal', bg: '#46295e' },
-  { id: 'explorer', name: 'Sunny the Explorer', kind: 'hero', bg: '#5e4a2a' },
-  { id: 'astronaut', name: 'Comet the Astronaut', kind: 'hero', bg: '#232d52' },
-  { id: 'aviator', name: 'Skye the Aviator', kind: 'hero', bg: '#503a28' },
-  { id: 'captain', name: 'Marina the Captain', kind: 'hero', bg: '#1f3a52' },
+  { id: 'sunny', name: 'Sunny Vale', kind: 'explorer', skin: '#e7b48c', skinShade: '#d59d73', hair: '#5b3f28', hairStyle: 'short', hat: 'brim', hatColor: '#b89b6a', jacket: '#c67b5c', jacketShade: '#a9603f', pants: '#5d5140', pack: '#7a8b6f', packAccent: '#5c6b52', shoe: '#463b30', bg: '#2a2622' },
+  { id: 'marco', name: 'Marco Reyes', kind: 'explorer', skin: '#d59f72', skinShade: '#bd8659', hair: '#2e2620', hairStyle: 'short', hat: 'cap', hatColor: '#33465e', jacket: '#4a6b6b', jacketShade: '#375252', pants: '#3b414d', pack: '#b0703f', packAccent: '#8a5530', shoe: '#2c2620', bg: '#1f2a2e' },
+  { id: 'aria', name: 'Aria Lindqvist', kind: 'explorer', skin: '#efc7a0', skinShade: '#dcae85', hair: '#3a2a1e', hairStyle: 'ponytail', hat: 'none', hatColor: '#000000', jacket: '#a86b7a', jacketShade: '#8a5462', pants: '#575263', pack: '#d3a568', packAccent: '#b3854a', shoe: '#3a3038', bg: '#2e2430' },
+  { id: 'kai', name: 'Kai Mensah', kind: 'explorer', skin: '#a9784f', skinShade: '#8f6340', hair: '#1a1512', hairStyle: 'short', hat: 'beanie', hatColor: '#6b7a5c', jacket: '#d0b06a', jacketShade: '#b0924f', pants: '#484036', pack: '#5c6b7a', packAccent: '#455260', shoe: '#282420', bg: '#26261f' },
+  { id: 'nadia', name: 'Nadia Amari', kind: 'explorer', skin: '#e4bb95', skinShade: '#cfa279', hair: '#241c14', hairStyle: 'bun', hat: 'brim', hatColor: '#c9a06a', jacket: '#6b8b7a', jacketShade: '#527065', pants: '#3b3842', pack: '#b56a5c', packAccent: '#8f5044', shoe: '#312c26', bg: '#222a26' },
+  { id: 'theo', name: 'Theo Bianchi', kind: 'explorer', skin: '#c68e5f', skinShade: '#a97444', hair: '#3a2a1a', hairStyle: 'curly', hat: 'cap', hatColor: '#7a5c3f', jacket: '#4a5c7a', jacketShade: '#374863', pants: '#484842', pack: '#c9a86a', packAccent: '#a5854c', shoe: '#2c2620', bg: '#1f2530' },
+  { id: 'luca', name: 'Luca Moreno', kind: 'explorer', skin: '#eec7a0', skinShade: '#d9ac82', hair: '#4a3320', hairStyle: 'short', hat: 'none', hatColor: '#000000', jacket: '#b5764a', jacketShade: '#955b34', pants: '#383e46', pack: '#7a8b9a', packAccent: '#5f6f7d', shoe: '#312e28', bg: '#2a2420' },
+  { id: 'mira', name: 'Mira Okonkwo', kind: 'explorer', skin: '#b07a52', skinShade: '#966239', hair: '#1a1410', hairStyle: 'ponytail', hat: 'beanie', hatColor: '#a86b6a', jacket: '#5c7a6b', jacketShade: '#456055', pants: '#423e48', pack: '#d3b36a', packAccent: '#b0904c', shoe: '#2c2824', bg: '#232823' },
 ];
 
 export const avatarById = new Map(AVATARS.map((a) => [a.id, a]));
+export const characterById = avatarById;
+
+// ─── back-of-head hair + hat ─────────────────────────────────────────────────
+
+function HairBack({ d }: { d: AvatarDef }) {
+  const { hair, hairStyle } = d;
+  return (
+    <g>
+      {/* hair mass covering the back of the head */}
+      <path d="M35 40 Q35 24 50 24 Q65 24 65 40 Q65 50 60 53 L40 53 Q35 50 35 40 Z" fill={hair} />
+      {hairStyle === 'bun' && <circle cx="50" cy="24" r="7" fill={hair} />}
+      {hairStyle === 'ponytail' && (
+        <path d="M50 30 Q58 40 55 62 Q52 70 48 62 Q46 44 50 30 Z" fill={hair} />
+      )}
+      {hairStyle === 'curly' && (
+        <g fill={hair}>
+          <circle cx="38" cy="30" r="6" />
+          <circle cx="50" cy="26" r="7" />
+          <circle cx="62" cy="30" r="6" />
+          <circle cx="36" cy="42" r="5" />
+          <circle cx="64" cy="42" r="5" />
+        </g>
+      )}
+    </g>
+  );
+}
+
+function HatBack({ d }: { d: AvatarDef }) {
+  if (d.hat === 'none') return null;
+  if (d.hat === 'cap') {
+    return (
+      <g>
+        <path d="M34 39 Q34 22 50 22 Q66 22 66 39 Q50 33 34 39 Z" fill={d.hatColor} />
+        {/* adjustable back strap detail */}
+        <rect x="45" y="37" width="10" height="5" rx="1.5" fill={d.hatColor} />
+        <rect x="48.5" y="38" width="3" height="3" rx="1" fill="rgba(0,0,0,0.35)" />
+      </g>
+    );
+  }
+  if (d.hat === 'beanie') {
+    return (
+      <g>
+        <path d="M33 42 Q33 22 50 22 Q67 22 67 42 Q50 36 33 42 Z" fill={d.hatColor} />
+        <rect x="33" y="40" width="34" height="5" rx="2.5" fill={d.hatColor} />
+        <path d="M37 43 L37 30 M44 44 L44 27 M50 44 L50 26 M56 44 L56 27 M63 43 L63 30" stroke="rgba(0,0,0,0.12)" strokeWidth="1.5" />
+      </g>
+    );
+  }
+  // brim (safari / bucket)
+  return (
+    <g>
+      <ellipse cx="50" cy="41" rx="24" ry="7" fill={d.hatColor} />
+      <path d="M35 41 Q35 21 50 21 Q65 21 65 41 Z" fill={d.hatColor} />
+      <ellipse cx="50" cy="41" rx="24" ry="7" fill="rgba(0,0,0,0.10)" />
+      <path d="M35 39 Q35 21 50 21 Q65 21 65 39 Z" fill={d.hatColor} />
+    </g>
+  );
+}
+
+// ─── front hair + hat + face ─────────────────────────────────────────────────
+
+function HairFront({ d }: { d: AvatarDef }) {
+  const { hair, hairStyle } = d;
+  return (
+    <g fill={hair}>
+      {/* hairline framing the forehead */}
+      <path d="M35 40 Q34 25 50 25 Q66 25 65 40 Q60 31 50 30 Q40 31 35 40 Z" />
+      {hairStyle === 'bun' && <circle cx="50" cy="24" r="5.5" />}
+      {hairStyle === 'ponytail' && (
+        <>
+          <path d="M35 40 Q33 33 36 46 Q33 44 34 38 Z" />
+          <path d="M65 40 Q67 33 64 46 Q67 44 66 38 Z" />
+        </>
+      )}
+      {hairStyle === 'curly' && (
+        <g>
+          <circle cx="38" cy="31" r="5" />
+          <circle cx="50" cy="27" r="6" />
+          <circle cx="62" cy="31" r="5" />
+        </g>
+      )}
+    </g>
+  );
+}
+
+function HatFront({ d }: { d: AvatarDef }) {
+  if (d.hat === 'none') return null;
+  if (d.hat === 'cap') {
+    return (
+      <g>
+        <path d="M34 39 Q34 23 50 23 Q66 23 66 39 Q50 33 34 39 Z" fill={d.hatColor} />
+        <path d="M33 39 Q22 40 21 44 Q34 44 50 41 Z" fill={d.hatColor} />
+        <path d="M33 39 Q22 40 21 44 Q34 44 50 41 Z" fill="rgba(0,0,0,0.12)" />
+      </g>
+    );
+  }
+  if (d.hat === 'beanie') {
+    return (
+      <g>
+        <path d="M33 41 Q33 23 50 23 Q67 23 67 41 Q50 35 33 41 Z" fill={d.hatColor} />
+        <rect x="33" y="39" width="34" height="5.5" rx="2.75" fill={d.hatColor} />
+      </g>
+    );
+  }
+  return (
+    <g>
+      <path d="M35 40 Q35 22 50 22 Q65 22 65 40 Z" fill={d.hatColor} />
+      <ellipse cx="50" cy="41" rx="25" ry="7.5" fill={d.hatColor} />
+      <ellipse cx="50" cy="41" rx="25" ry="7.5" fill="rgba(0,0,0,0.10)" />
+      <path d="M50 22 Q65 22 65 40 L35 40 Q35 22 50 22Z" fill={d.hatColor} />
+      <path d="M37 40 L63 40" stroke="rgba(0,0,0,0.12)" strokeWidth="2" />
+    </g>
+  );
+}
+
+function Face({ d }: { d: AvatarDef }) {
+  return (
+    <g>
+      {/* soft cheek shading */}
+      <ellipse cx="42" cy="46" rx="3" ry="2" fill={d.skinShade} opacity="0.4" />
+      <ellipse cx="58" cy="46" rx="3" ry="2" fill={d.skinShade} opacity="0.4" />
+      {/* eyes */}
+      <ellipse cx="44" cy="41" rx="1.7" ry="2.1" fill="#2a2320" />
+      <ellipse cx="56" cy="41" rx="1.7" ry="2.1" fill="#2a2320" />
+      <circle cx="44.6" cy="40.3" r="0.6" fill="#fff" />
+      <circle cx="56.6" cy="40.3" r="0.6" fill="#fff" />
+      {/* brows */}
+      <path d="M41 37.5 Q44 36.3 47 37.5" stroke={d.hair} strokeWidth="1.2" fill="none" strokeLinecap="round" />
+      <path d="M53 37.5 Q56 36.3 59 37.5" stroke={d.hair} strokeWidth="1.2" fill="none" strokeLinecap="round" />
+      {/* nose + gentle smile */}
+      <path d="M50 42 L49 46 Q50 47 51 46" stroke={d.skinShade} strokeWidth="1" fill="none" strokeLinecap="round" />
+      <path d="M46 50 Q50 53 54 50" stroke="#9a5a48" strokeWidth="1.4" fill="none" strokeLinecap="round" />
+    </g>
+  );
+}
+
+// ─── shared limb primitives ──────────────────────────────────────────────────
+
+function Backpack({ d }: { d: AvatarDef }) {
+  return (
+    <g>
+      <path d="M40 60 Q40 57 43 57 L57 57 Q60 57 60 60" fill="none" stroke={d.packAccent} strokeWidth="3" strokeLinecap="round" />
+      <rect x="31" y="60" width="38" height="52" rx="10" fill={d.pack} />
+      <rect x="31" y="60" width="38" height="52" rx="10" fill="url(#packShade)" />
+      <rect x="36" y="86" width="28" height="20" rx="6" fill={d.packAccent} opacity="0.55" />
+      <line x1="34" y1="74" x2="66" y2="74" stroke={d.packAccent} strokeWidth="1.5" opacity="0.6" />
+      <circle cx="50" cy="72" r="3" fill={d.packAccent} />
+    </g>
+  );
+}
+
+// ─── FRONT full figure (picker preview) ──────────────────────────────────────
+
+function FrontFigure({ d }: { d: AvatarDef }) {
+  return (
+    <g>
+      <ellipse cx="50" cy="167" rx="24" ry="4.5" fill="rgba(0,0,0,0.28)" />
+      {/* legs */}
+      <g>
+        <rect x="41" y="100" width="9" height="48" rx="4" fill={d.pants} />
+        <rect x="50" y="100" width="9" height="48" rx="4" fill={d.pants} />
+        <rect x="39" y="145" width="13" height="9" rx="3.5" fill={d.shoe} />
+        <rect x="48" y="145" width="13" height="9" rx="3.5" fill={d.shoe} />
+      </g>
+      {/* arms */}
+      <g>
+        <rect x="22" y="66" width="9" height="36" rx="4.5" fill={d.jacketShade} />
+        <circle cx="26.5" cy="103" r="4.5" fill={d.skin} />
+        <rect x="69" y="66" width="9" height="36" rx="4.5" fill={d.jacketShade} />
+        <circle cx="73.5" cy="103" r="4.5" fill={d.skin} />
+      </g>
+      {/* torso / jacket */}
+      <path d="M30 66 Q30 62 34 62 L66 62 Q70 62 70 66 L72 104 L28 104 Z" fill={d.jacket} />
+      <path d="M28 104 L72 104 L70 66 Q70 62 66 62 L58 62 L50 70 L58 104 Z" fill={d.jacketShade} opacity="0.35" />
+      <path d="M50 62 L45 70 L50 78 L55 70 Z" fill={d.jacketShade} opacity="0.6" />
+      <line x1="50" y1="70" x2="50" y2="104" stroke="rgba(0,0,0,0.18)" strokeWidth="1.2" />
+      {/* backpack straps over the shoulders */}
+      <rect x="37" y="63" width="5" height="40" rx="2.5" fill={d.packAccent} />
+      <rect x="58" y="63" width="5" height="40" rx="2.5" fill={d.packAccent} />
+      <rect x="36.5" y="86" width="6" height="5" rx="1.5" fill={d.pack} />
+      <rect x="57.5" y="86" width="6" height="5" rx="1.5" fill={d.pack} />
+      {/* neck + head */}
+      <rect x="45" y="53" width="10" height="10" rx="3" fill={d.skinShade} />
+      <circle cx="50" cy="41" r="15" fill={d.skin} />
+      <Face d={d} />
+      <HairFront d={d} />
+      <HatFront d={d} />
+    </g>
+  );
+}
+
+// ─── BACK full figure, animated (Street View third person) ───────────────────
+
+export function WalkingExplorer({ id, gait, size = 190 }: { id: string; gait: Gait; size?: number }) {
+  const d = avatarById.get(id) ?? AVATARS[0];
+  const legL = useRef<SVGGElement>(null);
+  const legR = useRef<SVGGElement>(null);
+  const armL = useRef<SVGGElement>(null);
+  const armR = useRef<SVGGElement>(null);
+  const bob = useRef<SVGGElement>(null);
+  const phase = useRef(0);
+
+  useEffect(() => {
+    let raf = 0;
+    let last = performance.now();
+    const cfg =
+      gait === 'run'
+        ? { spd: 12, leg: 34, arm: 26, bob: 4 }
+        : gait === 'walk'
+          ? { spd: 7.5, leg: 22, arm: 16, bob: 2.6 }
+          : { spd: 2.4, leg: 2.5, arm: 3, bob: 1.1 };
+    const lean = gait === 'run' ? 5 : gait === 'walk' ? 2 : 0;
+    const posing = gait === 'photo';
+    const tick = (now: number) => {
+      const dt = Math.min(0.05, (now - last) / 1000);
+      last = now;
+      phase.current += dt * cfg.spd;
+      const p = phase.current;
+      if (legL.current) legL.current.style.transform = `rotate(${Math.sin(p) * cfg.leg}deg)`;
+      if (legR.current) legR.current.style.transform = `rotate(${Math.sin(p + Math.PI) * cfg.leg}deg)`;
+      if (armL.current)
+        armL.current.style.transform = posing ? 'rotate(-46deg)' : `rotate(${Math.sin(p + Math.PI) * cfg.arm}deg)`;
+      if (armR.current)
+        armR.current.style.transform = posing ? 'rotate(46deg)' : `rotate(${Math.sin(p) * cfg.arm}deg)`;
+      if (bob.current)
+        bob.current.style.transform = `translateY(${-Math.abs(Math.sin(p)) * cfg.bob}px) rotate(${lean}deg)`;
+      raf = requestAnimationFrame(tick);
+    };
+    raf = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(raf);
+  }, [gait]);
+
+  const pivot = { transformBox: 'fill-box' as const, transformOrigin: 'top center' };
+
+  return (
+    <svg
+      viewBox="0 0 100 175"
+      width={(size * 100) / 175}
+      height={size}
+      role="img"
+      aria-label={`${d.name}, walking`}
+    >
+      <defs>
+        <linearGradient id="packShade" x1="0" y1="0" x2="1" y2="0">
+          <stop offset="0" stopColor="rgba(255,255,255,0.12)" />
+          <stop offset="0.5" stopColor="rgba(255,255,255,0)" />
+          <stop offset="1" stopColor="rgba(0,0,0,0.18)" />
+        </linearGradient>
+      </defs>
+      <ellipse cx="50" cy="168" rx={gait === 'idle' ? 22 : 20} ry="4.5" fill="rgba(0,0,0,0.32)" />
+      <g ref={bob} style={{ transformBox: 'fill-box', transformOrigin: '50% 100%' }}>
+        {/* legs (behind body) */}
+        <g ref={legL} style={pivot}>
+          <rect x="41" y="100" width="9" height="46" rx="4" fill={d.pants} />
+          <rect x="39" y="143" width="13" height="9" rx="3.5" fill={d.shoe} />
+        </g>
+        <g ref={legR} style={pivot}>
+          <rect x="50" y="100" width="9" height="46" rx="4" fill={d.pants} />
+          <rect x="48" y="143" width="13" height="9" rx="3.5" fill={d.shoe} />
+        </g>
+        {/* torso */}
+        <path d="M30 66 Q30 62 34 62 L66 62 Q70 62 70 66 L71 104 L29 104 Z" fill={d.jacket} />
+        {/* arms */}
+        <g ref={armL} style={pivot}>
+          <rect x="22" y="66" width="9" height="36" rx="4.5" fill={d.jacket} />
+          <circle cx="26.5" cy="103" r="4.5" fill={d.skin} />
+        </g>
+        <g ref={armR} style={pivot}>
+          <rect x="69" y="66" width="9" height="36" rx="4.5" fill={d.jacket} />
+          <circle cx="73.5" cy="103" r="4.5" fill={d.skin} />
+        </g>
+        {/* backpack (the hero detail from behind) */}
+        <Backpack d={d} />
+        {/* head */}
+        <rect x="45" y="52" width="10" height="10" rx="3" fill={d.skinShade} />
+        <circle cx="50" cy="41" r="15" fill={d.skin} />
+        <HairBack d={d} />
+        <HatBack d={d} />
+      </g>
+    </svg>
+  );
+}
+
+// ─── front portrait / standing (UI) ──────────────────────────────────────────
+
+export function ExplorerStanding({ id, size = 120 }: { id: string; size?: number }) {
+  const d = avatarById.get(id) ?? AVATARS[0];
+  return (
+    <svg viewBox="0 0 100 175" width={(size * 100) / 175} height={size} role="img" aria-label={d.name}>
+      <FrontFigure d={d} />
+    </svg>
+  );
+}
 
 export function AvatarIcon({ id, size = 48, className }: { id: string; size?: number; className?: string }) {
-  const def = avatarById.get(id) ?? AVATARS[0];
+  const d = avatarById.get(id) ?? AVATARS[0];
   return (
     <svg
       width={size}
       height={size}
-      viewBox="0 0 64 64"
+      viewBox="20 20 60 60"
       className={className}
       role="img"
-      aria-label={def.name}
+      aria-label={d.name}
     >
-      <circle cx="32" cy="32" r="31" fill={def.bg} />
-      {faces[def.id] ?? faces.fox}
+      <circle cx="50" cy="50" r="30" fill={d.bg} />
+      <clipPath id={`clip-${d.id}`}>
+        <circle cx="50" cy="50" r="30" />
+      </clipPath>
+      <g clipPath={`url(#clip-${d.id})`}>
+        {/* shoulders */}
+        <path d="M28 80 Q30 62 50 62 Q70 62 72 80 Z" fill={d.jacket} />
+        <rect x="37" y="63" width="5" height="18" rx="2.5" fill={d.packAccent} />
+        <rect x="58" y="63" width="5" height="18" rx="2.5" fill={d.packAccent} />
+        <rect x="45" y="53" width="10" height="11" rx="3" fill={d.skinShade} />
+        <circle cx="50" cy="41" r="15" fill={d.skin} />
+        <Face d={d} />
+        <HairFront d={d} />
+        <HatFront d={d} />
+      </g>
     </svg>
   );
 }

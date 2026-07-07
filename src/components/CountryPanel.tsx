@@ -16,7 +16,7 @@ function Skeleton({ className = 'h-4 w-24' }: { className?: string }) {
 function Section({ icon, title, children }: { icon: string; title: string; children: ReactNode }) {
   return (
     <section className="mt-5">
-      <h3 className="mb-2 flex items-center gap-2 text-xs font-extrabold uppercase tracking-widest text-amber-glow">
+      <h3 className="mb-2 flex items-center gap-2 text-xs font-extrabold uppercase tracking-widest text-gold-400">
         <span aria-hidden>{icon}</span> {title}
       </h3>
       {children}
@@ -26,7 +26,7 @@ function Section({ icon, title, children }: { icon: string; title: string; child
 
 function Fact({ label, value }: { label: string; value: ReactNode }) {
   return (
-    <div className="rounded-xl bg-dusk-800/80 px-3 py-2">
+    <div className="rounded-xl bg-ink-800/80 px-3 py-2">
       <div className="text-[10px] font-extrabold uppercase tracking-wider text-white/40">{label}</div>
       <div className="mt-0.5 text-sm font-bold text-white/90">{value}</div>
     </div>
@@ -84,7 +84,7 @@ export function CountryPanel() {
   const liveData = live.status === 'ok' ? live.data : null;
 
   return (
-    <aside className="absolute inset-y-0 right-0 z-20 flex w-full max-w-105 animate-fade-in flex-col border-l border-amber-glow/25 bg-dusk-900/95 shadow-2xl backdrop-blur-md">
+    <aside className="absolute inset-y-0 right-0 z-20 flex w-full max-w-105 animate-fade-in flex-col border-l border-gold-400/25 bg-ink-900/95 shadow-2xl backdrop-blur-md">
       {/* header */}
       <header className="flex items-start gap-3 border-b border-white/10 p-4">
         <img
@@ -97,7 +97,7 @@ export function CountryPanel() {
             {country.name} <span aria-hidden>{country.flagEmoji}</span>
           </h2>
           <p className="truncate text-xs font-semibold text-white/50">{country.officialName}</p>
-          <p className="mt-1 text-xs font-bold text-coral-300">
+          <p className="mt-1 text-xs font-bold text-clay-300">
             {country.region}
             {country.subregion ? ` · ${country.subregion}` : ''}
           </p>
@@ -105,7 +105,7 @@ export function CountryPanel() {
         <button
           onClick={() => selectCountry(null)}
           aria-label="Close panel"
-          className="rounded-full bg-white/10 px-2.5 py-1 text-sm font-black text-white/70 transition hover:bg-coral-500/40 hover:text-white"
+          className="rounded-full bg-white/10 px-2.5 py-1 text-sm font-black text-white/70 transition hover:bg-clay-500/40 hover:text-white"
         >
           ✕
         </button>
@@ -148,7 +148,7 @@ export function CountryPanel() {
           {weather.status === 'loading' && <Skeleton className="h-20 w-full" />}
           {weather.status === 'error' && UNAVAILABLE}
           {weather.status === 'ok' && (
-            <div className="rounded-2xl bg-gradient-to-br from-dusk-700 to-dusk-800 p-3">
+            <div className="rounded-2xl bg-gradient-to-br from-ink-700 to-ink-800 p-3">
               <div className="flex items-center gap-3">
                 <span className="text-4xl" aria-hidden>{weather.data.w.emoji}</span>
                 <div>
@@ -169,7 +169,7 @@ export function CountryPanel() {
                   )}
                 </div>
               </div>
-              <div className="mt-2 rounded-lg bg-dusk-950/50 px-2.5 py-1.5 text-xs font-bold text-gold-300">
+              <div className="mt-2 rounded-lg bg-ink-950/50 px-2.5 py-1.5 text-xs font-bold text-gold-300">
                 {weather.data.season.emoji} {weather.data.season.note}
               </div>
             </div>
@@ -188,7 +188,7 @@ export function CountryPanel() {
                   href={about.data.pageUrl}
                   target="_blank"
                   rel="noreferrer"
-                  className="font-bold text-coral-300 underline decoration-coral-500/50 hover:text-coral-400"
+                  className="font-bold text-clay-300 underline decoration-clay-500/50 hover:text-clay-400"
                 >
                   Wikipedia →
                 </a>
@@ -239,7 +239,7 @@ export function CountryPanel() {
                         className="h-20 w-32 rounded-lg object-cover ring-1 ring-white/15"
                       />
                     ) : (
-                      <div className="flex h-20 w-32 items-center justify-center rounded-lg bg-dusk-700 text-2xl">🗿</div>
+                      <div className="flex h-20 w-32 items-center justify-center rounded-lg bg-ink-700 text-2xl">🗿</div>
                     )}
                     <figcaption className="mt-1 line-clamp-2 text-[11px] font-bold leading-tight text-white/75">
                       {l.name}
@@ -264,7 +264,7 @@ export function CountryPanel() {
                     href={wildlife.data.summary.pageUrl}
                     target="_blank"
                     rel="noreferrer"
-                    className="font-bold text-coral-300 underline decoration-coral-500/50"
+                    className="font-bold text-clay-300 underline decoration-clay-500/50"
                   >
                     Wikipedia →
                   </a>
@@ -277,7 +277,7 @@ export function CountryPanel() {
                   {wildlife.data.endemic.slice(0, 8).map((s) => (
                     <span
                       key={s.qid}
-                      className="rounded-full bg-dusk-700 px-2.5 py-1 text-[11px] font-bold text-white/80"
+                      className="rounded-full bg-ink-700 px-2.5 py-1 text-[11px] font-bold text-white/80"
                       title={s.name}
                     >
                       {s.kingdom === 'animal' ? '🐾' : '🌿'} {s.commonName ?? s.name}
@@ -305,7 +305,7 @@ export function CountryPanel() {
                 {dishes.data.map((d) => (
                   <span
                     key={d.qid}
-                    className="inline-flex items-center gap-1.5 rounded-full bg-dusk-700 px-2.5 py-1 text-[11px] font-bold text-white/85"
+                    className="inline-flex items-center gap-1.5 rounded-full bg-ink-700 px-2.5 py-1 text-[11px] font-bold text-white/85"
                   >
                     {d.imageUrl && (
                       <img src={d.imageUrl} alt="" className="h-5 w-5 rounded-full object-cover" loading="lazy" />
@@ -322,7 +322,7 @@ export function CountryPanel() {
           {live.status === 'error' && UNAVAILABLE}
           {liveData &&
             (liveData.anthem ? (
-              <div className="rounded-xl bg-dusk-800/80 p-3">
+              <div className="rounded-xl bg-ink-800/80 p-3">
                 <div className="text-sm font-bold text-white/90">{liveData.anthem.name}</div>
                 {liveData.anthem.audioUrl ? (
                   <>
@@ -339,7 +339,7 @@ export function CountryPanel() {
                     href={liveData.anthem.articleUrl}
                     target="_blank"
                     rel="noreferrer"
-                    className="mt-1 inline-block text-xs font-bold text-coral-300 underline decoration-coral-500/50"
+                    className="mt-1 inline-block text-xs font-bold text-clay-300 underline decoration-clay-500/50"
                   >
                     Read about the anthem →
                   </a>
@@ -357,16 +357,18 @@ export function CountryPanel() {
         </p>
       </div>
 
-      {/* GO! */}
-      <footer className="border-t border-white/10 p-3">
+      {/* Step in */}
+      <footer className="border-t border-sand-100/10 p-3">
         <button
           onClick={() => {
             sfx.whoosh();
             enterCountry(country.cca3);
           }}
-          className="w-full rounded-2xl bg-gradient-to-r from-coral-500 via-coral-400 to-amber-glow py-3.5 font-display text-2xl font-extrabold tracking-wide text-dusk-950 shadow-lg shadow-coral-600/40 transition hover:scale-[1.015] hover:shadow-coral-500/60"
+          className="group flex w-full items-center justify-center gap-3 rounded-full bg-sand-100 py-3.5 font-medium tracking-wide text-ink-950 transition hover:bg-gold-300"
         >
-          GO! Step into {country.name} {country.flagEmoji}
+          <span className="font-display text-xl">Step into {country.name}</span>
+          <span aria-hidden>{country.flagEmoji}</span>
+          <span className="transition-transform group-hover:translate-x-1" aria-hidden>→</span>
         </button>
       </footer>
     </aside>

@@ -5,7 +5,7 @@ import { byCca3, type Country } from '../lib/countries';
 import { fetchCountryLive, fetchLandmarks, type Landmark } from '../lib/wikidata';
 import { useAsync } from '../lib/useAsync';
 import { findPanorama, loadGoogleMaps, mapsKey } from '../lib/googleMaps';
-import { AvatarIcon } from '../lib/avatars';
+import { WalkingExplorer, type Gait } from '../lib/avatars';
 import { sfx } from '../lib/sfx';
 import { CAMERA_STYLES, composePhoto } from '../lib/capture';
 import { WORLD_FEATURES, countryOfFeature } from '../lib/worldGeo';
@@ -49,7 +49,7 @@ export function StreetViewMode({ cca3 }: { cca3: string }) {
 
   if (prep.status !== 'ok') {
     return (
-      <div className="absolute inset-0 z-40 flex flex-col items-center justify-center gap-4 bg-dusk-950">
+      <div className="absolute inset-0 z-40 flex flex-col items-center justify-center gap-4 bg-ink-950">
         <div className="animate-float text-7xl" aria-hidden>🛸</div>
         <p className="font-display text-2xl font-extrabold text-gold-300">
           {prep.status === 'loading'
@@ -84,7 +84,7 @@ function ExitButton({ label = '← Back to the world' }: { label?: string }) {
         sfx.click();
         exitCountry();
       }}
-      className="rounded-full bg-dusk-800 px-4 py-2 text-sm font-extrabold text-white/85 shadow transition hover:bg-coral-500 hover:text-dusk-950"
+      className="rounded-full bg-ink-800 px-4 py-2 text-sm font-extrabold text-white/85 shadow transition hover:bg-clay-500 hover:text-ink-950"
     >
       {label}
     </button>
@@ -155,7 +155,7 @@ function CameraBar({
   const style = useGame((s) => s.cameraStyle);
   const setCameraStyle = useGame((s) => s.setCameraStyle);
   return (
-    <div className="pointer-events-auto flex items-center gap-2 rounded-full bg-dusk-950/80 p-2 backdrop-blur">
+    <div className="pointer-events-auto flex items-center gap-2 rounded-full bg-ink-950/80 p-2 backdrop-blur">
       {(Object.keys(CAMERA_STYLES) as CameraStyle[]).map((k) => (
         <button
           key={k}
@@ -164,7 +164,7 @@ function CameraBar({
             setCameraStyle(k);
           }}
           className={`rounded-full px-3 py-1.5 text-xs font-extrabold transition ${
-            style === k ? 'bg-gold-400 text-dusk-950' : 'text-white/65 hover:text-white'
+            style === k ? 'bg-gold-400 text-ink-950' : 'text-white/65 hover:text-white'
           }`}
           title={CAMERA_STYLES[k].label}
         >
@@ -174,7 +174,7 @@ function CameraBar({
       <button
         onClick={onShutter}
         disabled={capturing}
-        className="ml-1 flex h-14 w-14 items-center justify-center rounded-full bg-gradient-to-br from-coral-400 to-coral-600 text-2xl shadow-lg shadow-coral-600/50 ring-4 ring-white/25 transition enabled:hover:scale-110 disabled:opacity-60"
+        className="ml-1 flex h-14 w-14 items-center justify-center rounded-full bg-gradient-to-br from-clay-400 to-clay-600 text-2xl shadow-lg shadow-clay-600/50 ring-4 ring-white/25 transition enabled:hover:scale-110 disabled:opacity-60"
         title="Capture photo (C)"
         aria-label="Capture photo"
       >
@@ -184,15 +184,15 @@ function CameraBar({
   );
 }
 
-function TppAvatar() {
+function TppAvatar({ gait }: { gait: Gait }) {
   const player = useGame((s) => s.player);
   if (!player) return null;
   return (
-    <div className="pointer-events-none absolute inset-x-0 bottom-24 z-10 flex flex-col items-center">
-      <div className="animate-float drop-shadow-[0_12px_18px_rgba(0,0,0,0.55)]">
-        <AvatarIcon id={player.avatarId} size={110} />
+    <div className="pointer-events-none absolute inset-x-0 bottom-16 z-10 flex flex-col items-center">
+      <div className="drop-shadow-[0_14px_20px_rgba(0,0,0,0.6)]">
+        <WalkingExplorer id={player.avatarId} gait={gait} size={230} />
       </div>
-      <span className="mt-1 rounded-full bg-dusk-950/75 px-3 py-0.5 text-xs font-extrabold text-gold-300">
+      <span className="-mt-2 rounded-full bg-ink-950/70 px-3 py-0.5 text-[11px] font-semibold tracking-wide text-sand-200/90">
         {player.nickname}
       </span>
     </div>
@@ -211,12 +211,12 @@ function TeleportDrawer({
   photoModeOnly: boolean;
 }) {
   return (
-    <div className="absolute inset-y-0 right-0 z-30 flex w-80 animate-fade-in flex-col border-l border-amber-glow/25 bg-dusk-900/95 backdrop-blur">
+    <div className="absolute inset-y-0 right-0 z-30 flex w-80 animate-fade-in flex-col border-l border-gold-400/25 bg-ink-900/95 backdrop-blur">
       <header className="flex items-center justify-between border-b border-white/10 p-3">
         <h3 className="font-display text-lg font-extrabold text-gold-300">🗼 Teleport to a landmark</h3>
         <button
           onClick={onClose}
-          className="rounded-full bg-white/10 px-2 text-sm font-black text-white/70 hover:bg-coral-500/40"
+          className="rounded-full bg-white/10 px-2 text-sm font-black text-white/70 hover:bg-clay-500/40"
           aria-label="Close teleport menu"
         >
           ✕
@@ -241,7 +241,7 @@ function TeleportDrawer({
               {l.imageUrl ? (
                 <img src={l.imageUrl} alt="" loading="lazy" className="h-12 w-16 rounded-lg object-cover" />
               ) : (
-                <div className="flex h-12 w-16 items-center justify-center rounded-lg bg-dusk-700 text-xl">🗿</div>
+                <div className="flex h-12 w-16 items-center justify-center rounded-lg bg-ink-700 text-xl">🗿</div>
               )}
               <span className="min-w-0 flex-1 truncate text-sm font-bold text-white/85">{l.name}</span>
               <span aria-hidden>→</span>
@@ -259,7 +259,7 @@ function TeleportDrawer({
 function Toast({ msg }: { msg: string | null }) {
   if (!msg) return null;
   return (
-    <div className="pointer-events-none absolute left-1/2 top-20 z-40 -translate-x-1/2 animate-pop-in rounded-2xl border border-amber-glow/40 bg-dusk-900/95 px-5 py-2.5 text-sm font-extrabold text-gold-300 shadow-xl">
+    <div className="pointer-events-none absolute left-1/2 top-20 z-40 -translate-x-1/2 animate-pop-in rounded-2xl border border-gold-400/40 bg-ink-900/95 px-5 py-2.5 text-sm font-extrabold text-gold-300 shadow-xl">
       {msg}
     </div>
   );
@@ -289,12 +289,14 @@ function StreetCore({
   const mapObj = useRef<google.maps.Map | null>(null);
   const [status, setStatus] = useState<'loading' | 'ready'>('loading');
   const [placeLabel, setPlaceLabel] = useState(spawn.label);
-  const [tpp, setTpp] = useState(false);
+  const [tpp, setTpp] = useState(true); // third person by default — you see your explorer
   const [mapBig, setMapBig] = useState(false);
   const [teleportOpen, setTeleportOpen] = useState(false);
   const [spawnFlash, setSpawnFlash] = useState(0);
+  const [gait, setGait] = useState<Gait>('idle');
   const keysDown = useRef<Set<string>>(new Set());
   const lastStep = useRef(0);
+  const photoUntil = useRef(0);
   const { capture, capturing, flash, toast, setToast } = useCapture(country);
 
   // boot the panorama + mini-map
@@ -382,11 +384,18 @@ function StreetCore({
       if (keys.has('a')) pano.setPov({ ...pov, heading: (pov.heading - 4.2 + 360) % 360 });
       if (keys.has('d')) pano.setPov({ ...pov, heading: (pov.heading + 4.2) % 360 });
 
+      // drive the third-person character animation from what's held down
+      const moving = keys.has('w') || keys.has('s') || keys.has('arrowup') || keys.has('arrowdown');
+      const running = keys.has('r') || keys.has('shift');
+      const nextGait: Gait =
+        Date.now() < photoUntil.current ? 'photo' : moving ? (running ? 'run' : 'walk') : 'idle';
+      setGait((g) => (g === nextGait ? g : nextGait));
+
       let dir: number | null = null;
       if (keys.has('w') || keys.has('arrowup')) dir = 0;
       else if (keys.has('s') || keys.has('arrowdown')) dir = 180;
       if (dir === null) return;
-      const run = keys.has('r') || keys.has('shift');
+      const run = running;
       const cooldown = run ? 240 : 640;
       const now = Date.now();
       if (now - lastStep.current < cooldown) return;
@@ -426,6 +435,8 @@ function StreetCore({
   const doCapture = useCallback(async () => {
     const pano = panoObj.current;
     if (!pano || !mapsKey) return;
+    photoUntil.current = Date.now() + 900; // character strikes a photo pose
+    setGait('photo');
     const panoId = pano.getPano();
     const pov = pano.getPov();
     const zoom = pano.getZoom() ?? 1;
@@ -460,11 +471,11 @@ function StreetCore({
   );
 
   return (
-    <div className="absolute inset-0 z-40 bg-dusk-950">
+    <div className="absolute inset-0 z-40 bg-ink-950">
       <div ref={panoRef} className="h-full w-full" />
 
       {status === 'loading' && (
-        <div className="absolute inset-0 z-20 flex flex-col items-center justify-center gap-3 bg-dusk-950">
+        <div className="absolute inset-0 z-20 flex flex-col items-center justify-center gap-3 bg-ink-950">
           <div className="animate-float text-7xl" aria-hidden>🛸</div>
           <p className="font-display text-xl font-extrabold text-gold-300">
             Finding a landing spot in {spawn.label}…
@@ -476,7 +487,7 @@ function StreetCore({
       <div className="pointer-events-none absolute inset-x-0 top-0 z-30 flex items-start justify-between gap-2 p-3">
         <div className="pointer-events-auto flex items-center gap-2">
           <ExitButton />
-          <div className="rounded-full bg-dusk-950/80 px-4 py-2 text-sm font-extrabold text-gold-300 backdrop-blur">
+          <div className="rounded-full bg-ink-950/80 px-4 py-2 text-sm font-extrabold text-gold-300 backdrop-blur">
             {country.flagEmoji} {country.name} · <span className="text-white/80">{placeLabel}</span>
           </div>
         </div>
@@ -486,7 +497,7 @@ function StreetCore({
               sfx.click();
               setTpp((t) => !t);
             }}
-            className="rounded-full bg-dusk-950/80 px-3 py-2 text-xs font-extrabold text-white/80 backdrop-blur transition hover:text-white"
+            className="rounded-full bg-ink-950/80 px-3 py-2 text-xs font-extrabold text-white/80 backdrop-blur transition hover:text-white"
             title="Toggle first/third person (V)"
           >
             {tpp ? '👁️ FPP' : '🧍 TPP'}
@@ -496,7 +507,7 @@ function StreetCore({
               sfx.click();
               setTeleportOpen((o) => !o);
             }}
-            className="rounded-full bg-dusk-950/80 px-3 py-2 text-xs font-extrabold text-white/80 backdrop-blur transition hover:text-white"
+            className="rounded-full bg-ink-950/80 px-3 py-2 text-xs font-extrabold text-white/80 backdrop-blur transition hover:text-white"
           >
             🗼 Teleport
           </button>
@@ -505,7 +516,7 @@ function StreetCore({
 
       {/* mini-map (top-left, under the HUD row) */}
       <div
-        className={`absolute left-3 top-16 z-20 overflow-hidden rounded-2xl border-2 border-amber-glow/50 shadow-xl transition-all ${
+        className={`absolute left-3 top-16 z-20 overflow-hidden rounded-2xl border-2 border-gold-400/50 shadow-xl transition-all ${
           mapBig ? 'h-80 w-105' : 'h-44 w-44'
         }`}
       >
@@ -515,27 +526,27 @@ function StreetCore({
             sfx.click();
             setMapBig((b) => !b);
           }}
-          className="absolute bottom-1.5 right-1.5 rounded-lg bg-dusk-950/85 px-2 py-1 text-[11px] font-extrabold text-gold-300"
+          className="absolute bottom-1.5 right-1.5 rounded-lg bg-ink-950/85 px-2 py-1 text-[11px] font-extrabold text-gold-300"
           title="Expand map (M)"
         >
           {mapBig ? '🗺️ Shrink' : '🗺️ Map'}
         </button>
       </div>
 
-      {tpp && <TppAvatar />}
+      {tpp && <TppAvatar gait={gait} />}
 
       {/* bottom HUD */}
       <div className="pointer-events-none absolute inset-x-0 bottom-0 z-30 flex flex-col items-center gap-2 p-4">
         <CameraBar onShutter={() => void doCapture()} capturing={capturing} />
-        <div className="rounded-full bg-dusk-950/75 px-4 py-1.5 text-[11px] font-bold text-white/70 backdrop-blur">
-          <kbd className="text-amber-glow">WASD</kbd> walk · hold <kbd className="text-amber-glow">R</kbd> to run ·
-          drag to look · <kbd className="text-amber-glow">V</kbd> view · <kbd className="text-amber-glow">C</kbd>{' '}
-          capture · <kbd className="text-amber-glow">M</kbd> map
+        <div className="rounded-full bg-ink-950/75 px-4 py-1.5 text-[11px] font-bold text-white/70 backdrop-blur">
+          <kbd className="text-gold-400">WASD</kbd> walk · hold <kbd className="text-gold-400">R</kbd> to run ·
+          drag to look · <kbd className="text-gold-400">V</kbd> view · <kbd className="text-gold-400">C</kbd>{' '}
+          capture · <kbd className="text-gold-400">M</kbd> map
         </div>
       </div>
 
       {/* honest imagery label */}
-      <div className="pointer-events-none absolute bottom-4 right-4 z-30 rounded-lg bg-dusk-950/80 px-2.5 py-1 text-[10px] font-bold text-white/55">
+      <div className="pointer-events-none absolute bottom-4 right-4 z-30 rounded-lg bg-ink-950/80 px-2.5 py-1 text-[10px] font-bold text-white/55">
         🟢 Live Google Street View — real imagery © Google
       </div>
 
@@ -600,20 +611,30 @@ function PhotoExplore({
   const exitCountry = useGame((s) => s.exitCountry);
   const withImages = useMemo(() => spawn.landmarks.filter((l) => l.imageUrl), [spawn.landmarks]);
   const [idx, setIdx] = useState(0);
-  const [tpp, setTpp] = useState(false);
+  const [tpp, setTpp] = useState(true); // third person by default — you see your explorer
   const [teleportOpen, setTeleportOpen] = useState(false);
   const [spawnFlash, setSpawnFlash] = useState(1);
+  const [gait, setGait] = useState<Gait>('idle');
+  const gaitTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const { capture, capturing, flash, toast, setToast } = useCapture(country);
   const current = withImages.length > 0 ? withImages[idx % withImages.length] : null;
+
+  // pulse the character into a gait for a beat, then settle back to idle
+  const pulseGait = useCallback((g: Gait, ms: number) => {
+    setGait(g);
+    if (gaitTimer.current) clearTimeout(gaitTimer.current);
+    gaitTimer.current = setTimeout(() => setGait('idle'), ms);
+  }, []);
 
   const move = useCallback(
     (delta: number) => {
       if (withImages.length === 0) return;
       setIdx((i) => (i + delta + withImages.length) % withImages.length);
       setSpawnFlash((f) => f + 1);
+      pulseGait('walk', 650);
       sfx.step();
     },
-    [withImages.length],
+    [withImages.length, pulseGait],
   );
 
   useEffect(() => {
@@ -623,19 +644,22 @@ function PhotoExplore({
       if (k === 'a' || k === 'arrowleft' || k === 's') move(-1);
       if (k === 'd' || k === 'arrowright' || k === 'w') move(1);
       if (k === 'v') setTpp((t) => !t);
-      if (k === 'c' && current) void capture(bigThumb(current.imageUrl!), current.name);
+      if (k === 'c' && current) {
+        pulseGait('photo', 900);
+        void capture(bigThumb(current.imageUrl!), current.name);
+      }
       if (k === 'escape') exitCountry();
     };
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
-  }, [move, current, capture, exitCountry]);
+  }, [move, current, capture, exitCountry, pulseGait]);
 
   useEffect(() => {
     sfx.whoosh();
   }, []);
 
   return (
-    <div className="absolute inset-0 z-40 overflow-hidden bg-dusk-950">
+    <div className="absolute inset-0 z-40 overflow-hidden bg-ink-950">
       {current ? (
         <img
           key={current.qid}
@@ -662,7 +686,7 @@ function PhotoExplore({
           <div className="pointer-events-none absolute inset-x-0 top-0 z-30 flex items-start justify-between gap-2 p-3">
             <div className="pointer-events-auto flex items-center gap-2">
               <ExitButton />
-              <div className="rounded-full bg-dusk-950/80 px-4 py-2 text-sm font-extrabold text-gold-300 backdrop-blur">
+              <div className="rounded-full bg-ink-950/80 px-4 py-2 text-sm font-extrabold text-gold-300 backdrop-blur">
                 {country.flagEmoji} {country.name} · <span className="text-white/80">{current.name}</span>
               </div>
             </div>
@@ -672,7 +696,7 @@ function PhotoExplore({
                   sfx.click();
                   setTpp((t) => !t);
                 }}
-                className="rounded-full bg-dusk-950/80 px-3 py-2 text-xs font-extrabold text-white/80 backdrop-blur"
+                className="rounded-full bg-ink-950/80 px-3 py-2 text-xs font-extrabold text-white/80 backdrop-blur"
                 title="Toggle first/third person (V)"
               >
                 {tpp ? '👁️ FPP' : '🧍 TPP'}
@@ -682,7 +706,7 @@ function PhotoExplore({
                   sfx.click();
                   setTeleportOpen((o) => !o);
                 }}
-                className="rounded-full bg-dusk-950/80 px-3 py-2 text-xs font-extrabold text-white/80 backdrop-blur"
+                className="rounded-full bg-ink-950/80 px-3 py-2 text-xs font-extrabold text-white/80 backdrop-blur"
               >
                 🗼 Teleport
               </button>
@@ -690,7 +714,7 @@ function PhotoExplore({
           </div>
 
           {/* mini country-shape map */}
-          <div className="absolute left-3 top-16 z-20 h-44 w-44 overflow-hidden rounded-2xl border-2 border-amber-glow/50 bg-dusk-900/90 shadow-xl">
+          <div className="absolute left-3 top-16 z-20 h-44 w-44 overflow-hidden rounded-2xl border-2 border-gold-400/50 bg-ink-900/90 shadow-xl">
             <MiniShape country={country} lat={current.lat} lng={current.lng} />
             <span className="absolute bottom-1 left-0 right-0 text-center text-[9px] font-bold text-white/45">
               {country.name}
@@ -700,42 +724,54 @@ function PhotoExplore({
           {/* nav arrows */}
           <button
             onClick={() => move(-1)}
-            className="absolute left-4 top-1/2 z-20 -translate-y-1/2 rounded-full bg-dusk-950/70 px-4 py-3 text-2xl font-black text-white/80 backdrop-blur transition hover:bg-dusk-950"
+            className="absolute left-4 top-1/2 z-20 -translate-y-1/2 rounded-full bg-ink-950/70 px-4 py-3 text-2xl font-black text-white/80 backdrop-blur transition hover:bg-ink-950"
             aria-label="Previous landmark"
           >
             ←
           </button>
           <button
             onClick={() => move(1)}
-            className="absolute right-4 top-1/2 z-20 -translate-y-1/2 rounded-full bg-dusk-950/70 px-4 py-3 text-2xl font-black text-white/80 backdrop-blur transition hover:bg-dusk-950"
+            className="absolute right-4 top-1/2 z-20 -translate-y-1/2 rounded-full bg-ink-950/70 px-4 py-3 text-2xl font-black text-white/80 backdrop-blur transition hover:bg-ink-950"
             aria-label="Next landmark"
           >
             →
           </button>
 
-          {tpp && <TppAvatar />}
+          {tpp && <TppAvatar gait={gait} />}
 
           {/* bottom HUD */}
           <div className="pointer-events-none absolute inset-x-0 bottom-0 z-30 flex flex-col items-center gap-2 p-4">
             <CameraBar
-              onShutter={() => current && void capture(bigThumb(current.imageUrl!), current.name)}
+              onShutter={() => {
+                if (!current) return;
+                pulseGait('photo', 900);
+                void capture(bigThumb(current.imageUrl!), current.name);
+              }}
               capturing={capturing}
             />
-            <div className="rounded-full bg-dusk-950/75 px-4 py-1.5 text-[11px] font-bold text-white/70 backdrop-blur">
-              <kbd className="text-amber-glow">A</kbd>/<kbd className="text-amber-glow">D</kbd> wander between
-              landmarks · <kbd className="text-amber-glow">C</kbd> capture ·{' '}
+            <div className="rounded-full bg-ink-950/75 px-4 py-1.5 text-[11px] font-bold text-white/70 backdrop-blur">
+              <kbd className="text-gold-400">A</kbd>/<kbd className="text-gold-400">D</kbd> wander between
+              landmarks · <kbd className="text-gold-400">C</kbd> capture ·{' '}
               {withImages.length} places · {idx + 1} of {withImages.length}
             </div>
           </div>
         </>
       )}
 
-      {/* honest mode banner */}
-      <div className="pointer-events-none absolute bottom-4 right-4 z-30 max-w-72 rounded-lg bg-dusk-950/85 px-2.5 py-1.5 text-[10px] font-bold leading-4 text-white/60">
-        🖼️ Photo exploration — real photos from Wikimedia Commons.{' '}
-        {noCoverage
-          ? 'No Street View coverage was found near the spawn point.'
-          : 'Add VITE_GOOGLE_MAPS_API_KEY to unlock live Street View.'}
+      {/* honest mode banner + key unlock CTA */}
+      <div className="absolute bottom-4 right-4 z-30 max-w-80 rounded-xl border border-sand-100/12 bg-ink-950/85 px-3.5 py-2.5 backdrop-blur">
+        <p className="text-[11px] font-medium leading-4 text-sand-200/70">
+          Photo exploration — real photographs from Wikimedia Commons.{' '}
+          {noCoverage && 'No Street View coverage near this spot.'}
+        </p>
+        <a
+          href="https://developers.google.com/maps/documentation/javascript/get-api-key"
+          target="_blank"
+          rel="noreferrer"
+          className="pointer-events-auto mt-1.5 inline-flex items-center gap-1.5 text-[11px] font-semibold text-gold-300 underline decoration-gold-300/40 hover:text-gold-400"
+        >
+          Add a Google Maps key to walk in live Street View →
+        </a>
       </div>
 
       {teleportOpen && (

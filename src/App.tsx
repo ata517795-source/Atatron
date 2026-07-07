@@ -10,10 +10,10 @@ import { ExplorersPanel } from './components/ExplorersPanel';
 import { Celebration } from './components/Celebration';
 import { AvatarIcon } from './lib/avatars';
 
-const VIEWS: { id: ViewMode; label: string; icon: string }[] = [
-  { id: 'globe', label: 'Globe', icon: '🌍' },
-  { id: 'flat', label: 'Map', icon: '🗺️' },
-  { id: 'astro', label: 'Astro', icon: '✨' },
+const VIEWS: { id: ViewMode; label: string }[] = [
+  { id: 'globe', label: 'Globe' },
+  { id: 'flat', label: 'Map' },
+  { id: 'astro', label: 'Astro' },
 ];
 
 function WorldScreen() {
@@ -30,23 +30,23 @@ function WorldScreen() {
 
   return (
     <div className="flex h-full flex-col">
-      <header className="z-30 flex items-center gap-3 border-b border-amber-glow/20 bg-dusk-900/90 px-4 py-2 backdrop-blur">
-        <h1 className="font-display text-xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-gold-400 to-coral-400">
-          🌍 Wanderworld
+      <header className="z-30 flex items-center gap-4 border-b border-sand-100/10 bg-ink-900/80 px-5 py-2.5 backdrop-blur">
+        <h1 className="font-display text-lg font-medium tracking-[0.28em] text-sand-100">
+          WANDERWORLD
         </h1>
 
-        <nav className="ml-2 flex rounded-full bg-dusk-800 p-1" aria-label="World view">
+        <nav className="ml-1 flex items-center gap-1" aria-label="World view">
           {VIEWS.map((v) => (
             <button
               key={v.id}
               onClick={() => setViewMode(v.id)}
-              className={`rounded-full px-3.5 py-1 text-sm font-extrabold transition ${
+              className={`rounded-full px-3.5 py-1 text-sm tracking-wide transition ${
                 viewMode === v.id
-                  ? 'bg-gradient-to-r from-coral-500 to-amber-glow text-dusk-950 shadow'
-                  : 'text-white/60 hover:text-white'
+                  ? 'bg-sand-100 font-semibold text-ink-950'
+                  : 'font-medium text-sand-200/55 hover:text-sand-100'
               }`}
             >
-              {v.icon} {v.label}
+              {v.label}
             </button>
           ))}
         </nav>
@@ -54,38 +54,38 @@ function WorldScreen() {
         <div className="ml-auto flex items-center gap-2">
           <button
             onClick={() => setAlbumOpen(true)}
-            className="group flex items-center gap-2 rounded-full bg-dusk-800 px-3 py-1.5 text-sm font-extrabold text-gold-300 transition hover:bg-dusk-700"
+            className="group flex items-center gap-2.5 rounded-full border border-sand-100/12 px-3.5 py-1.5 text-sm font-medium text-sand-100 transition hover:border-gold-300/40 hover:bg-ink-800"
             title="Open your photo album"
           >
-            📸 {photos.length}/{PHOTO_GOAL}
-            <span className="h-1.5 w-16 overflow-hidden rounded-full bg-dusk-950">
+            <span className="text-gold-300">Album</span>
+            <span className="text-sand-200/60">{photos.length}<span className="text-sand-200/30">/{PHOTO_GOAL}</span></span>
+            <span className="h-1 w-14 overflow-hidden rounded-full bg-ink-700">
               <span
-                className="block h-full rounded-full bg-gradient-to-r from-coral-500 to-gold-400 transition-all"
+                className="block h-full rounded-full bg-gold-300 transition-all"
                 style={{ width: `${progress}%` }}
               />
             </span>
           </button>
           <button
             onClick={() => setExplorersOpen(true)}
-            className="rounded-full bg-dusk-800 px-3 py-1.5 text-sm font-extrabold text-white/70 transition hover:bg-dusk-700 hover:text-white"
-            title="Explorers"
+            className="rounded-full border border-sand-100/12 px-3.5 py-1.5 text-sm font-medium text-sand-200/70 transition hover:border-gold-300/40 hover:text-sand-100"
           >
-            🧑‍🤝‍🧑 Explorers
+            Explorers
           </button>
           <button
             onClick={toggleSound}
-            className="rounded-full bg-dusk-800 px-2.5 py-1.5 text-sm transition hover:bg-dusk-700"
+            className="rounded-full border border-sand-100/12 px-2.5 py-1.5 text-xs text-sand-200/60 transition hover:text-sand-100"
             title={soundOn ? 'Mute sounds' : 'Unmute sounds'}
           >
-            {soundOn ? '🔊' : '🔇'}
+            {soundOn ? 'Sound ◉' : 'Sound ○'}
           </button>
           <button
             onClick={signOut}
-            className="flex items-center gap-2 rounded-full bg-dusk-800 py-1 pl-1 pr-3 transition hover:bg-dusk-700"
+            className="flex items-center gap-2 rounded-full border border-sand-100/12 py-1 pl-1 pr-3 transition hover:border-gold-300/40"
             title={`${player.nickname} — click to sign out`}
           >
             <AvatarIcon id={player.avatarId} size={26} />
-            <span className="max-w-28 truncate text-sm font-extrabold text-white/85">{player.nickname}</span>
+            <span className="max-w-28 truncate text-sm font-medium text-sand-100">{player.nickname}</span>
           </button>
         </div>
       </header>

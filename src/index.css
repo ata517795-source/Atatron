@@ -1,44 +1,62 @@
 @import "tailwindcss";
 
 @theme {
-  /* Sunset Explorer palette: warm coral/amber/gold over deep indigo dusk */
-  --color-dusk-950: #070b24;
-  --color-dusk-900: #0c1233;
-  --color-dusk-800: #141b4d;
-  --color-dusk-700: #1e2766;
-  --color-dusk-600: #2a357f;
-  --color-dusk-500: #3b4899;
+  /* ── Wanderworld editorial palette ──────────────────────────────────────
+     Calm, natural, golden-hour: deep ink-teal grounds, warm sand + gold,
+     muted terracotta and sage accents. Chosen to feel like a travel journal. */
+  --color-ink-950: #0c1216;
+  --color-ink-900: #111a1f;
+  --color-ink-850: #16222a;
+  --color-ink-800: #1c2b33;
+  --color-ink-700: #26383f;
+  --color-ink-600: #33484f;
+  --color-ink-500: #455e66;
 
-  --color-coral-300: #ffb3a0;
-  --color-coral-400: #ff8f73;
-  --color-coral-500: #ff6b57;
-  --color-coral-600: #f04e3e;
+  --color-sand-50: #faf6ee;
+  --color-sand-100: #f2ebdd;
+  --color-sand-200: #e6d8c1;
+  --color-sand-300: #d6c0a0;
+  --color-sand-400: #c2a67f;
 
-  --color-amber-glow: #ffb347;
-  --color-gold-300: #ffe29a;
-  --color-gold-400: #ffd166;
-  --color-gold-500: #f4b942;
+  --color-gold-300: #e5cd9c;
+  --color-gold-400: #d3b277;
+  --color-gold-500: #bd9857;
 
-  --font-display: "Baloo 2", "Nunito", ui-rounded, system-ui, sans-serif;
-  --font-sans: "Nunito", system-ui, -apple-system, sans-serif;
+  --color-clay-300: #dba98d;
+  --color-clay-400: #cf8f6d;
+  --color-clay-500: #bd7350;
+  --color-clay-600: #a15c3c;
 
-  --animate-fade-in: fade-in 0.35s ease-out both;
-  --animate-pop-in: pop-in 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) both;
-  --animate-twinkle: twinkle 2.4s ease-in-out infinite;
-  --animate-shimmer: shimmer 1.4s linear infinite;
-  --animate-float: float 5s ease-in-out infinite;
+  --color-sage-300: #b3c7ba;
+  --color-sage-400: #90ab9c;
+  --color-sage-500: #6f8d7e;
+
+  --font-display: "Cormorant Garamond", "Fraunces", Georgia, "Times New Roman", serif;
+  --font-sans: "Inter", "Nunito Sans", system-ui, -apple-system, sans-serif;
+
+  --animate-fade-in: fade-in 0.5s cubic-bezier(0.22, 1, 0.36, 1) both;
+  --animate-fade-up: fade-up 0.7s cubic-bezier(0.22, 1, 0.36, 1) both;
+  --animate-pop-in: pop-in 0.4s cubic-bezier(0.34, 1.4, 0.64, 1) both;
+  --animate-twinkle: twinkle 3s ease-in-out infinite;
+  --animate-shimmer: shimmer 1.6s linear infinite;
+  --animate-float: float 6s ease-in-out infinite;
+  --animate-drift: drift 40s linear infinite;
 
   @keyframes fade-in {
-    from { opacity: 0; transform: translateY(8px); }
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+  @keyframes fade-up {
+    from { opacity: 0; transform: translateY(18px); }
     to { opacity: 1; transform: translateY(0); }
   }
   @keyframes pop-in {
-    from { opacity: 0; transform: scale(0.9); }
+    from { opacity: 0; transform: scale(0.94); }
     to { opacity: 1; transform: scale(1); }
   }
   @keyframes twinkle {
-    0%, 100% { opacity: 0.25; }
-    50% { opacity: 1; }
+    0%, 100% { opacity: 0.2; }
+    50% { opacity: 0.9; }
   }
   @keyframes shimmer {
     from { background-position: -200% 0; }
@@ -46,7 +64,11 @@
   }
   @keyframes float {
     0%, 100% { transform: translateY(0); }
-    50% { transform: translateY(-10px); }
+    50% { transform: translateY(-8px); }
+  }
+  @keyframes drift {
+    from { transform: translateX(0); }
+    to { transform: translateX(-50%); }
   }
 }
 
@@ -57,9 +79,14 @@ html, body, #root {
 
 body {
   font-family: var(--font-sans);
-  background: var(--color-dusk-950);
-  color: #f5f0ff;
+  background: var(--color-ink-950);
+  color: var(--color-sand-100);
   -webkit-font-smoothing: antialiased;
+  letter-spacing: 0.01em;
+}
+
+.font-display {
+  letter-spacing: 0.01em;
 }
 
 /* skeleton shimmer for loading states */
@@ -67,36 +94,41 @@ body {
   border-radius: 0.5rem;
   background: linear-gradient(
     100deg,
-    rgba(255, 255, 255, 0.06) 40%,
-    rgba(255, 255, 255, 0.16) 50%,
-    rgba(255, 255, 255, 0.06) 60%
+    rgba(242, 235, 221, 0.05) 40%,
+    rgba(242, 235, 221, 0.12) 50%,
+    rgba(242, 235, 221, 0.05) 60%
   );
   background-size: 200% 100%;
   animation: var(--animate-shimmer);
 }
 
-/* thin scrollbars that fit the dusk theme */
+/* thin, quiet scrollbars */
 * {
   scrollbar-width: thin;
-  scrollbar-color: rgba(255, 179, 71, 0.45) transparent;
+  scrollbar-color: rgba(211, 178, 119, 0.35) transparent;
 }
-*::-webkit-scrollbar { width: 8px; height: 8px; }
-*::-webkit-scrollbar-thumb { background: rgba(255, 179, 71, 0.35); border-radius: 8px; }
+*::-webkit-scrollbar { width: 7px; height: 7px; }
+*::-webkit-scrollbar-thumb { background: rgba(211, 178, 119, 0.28); border-radius: 8px; }
 *::-webkit-scrollbar-track { background: transparent; }
 
-/* teleport flash used when entering a country / teleporting */
 @keyframes teleport-flash {
-  0% { opacity: 1; }
+  0% { opacity: 0.85; }
   100% { opacity: 0; }
 }
-.teleport-flash {
-  animation: teleport-flash 0.9s ease-out both;
-}
+.teleport-flash { animation: teleport-flash 1s ease-out both; }
 
 @keyframes shutter-flash {
-  0% { opacity: 0.95; }
+  0% { opacity: 0.9; }
   100% { opacity: 0; }
 }
-.shutter-flash {
-  animation: shutter-flash 0.45s ease-out both;
+.shutter-flash { animation: shutter-flash 0.5s ease-out both; }
+
+/* faint film grain for the editorial, non-"AI-flat" feel */
+.grain::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.05;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
 }

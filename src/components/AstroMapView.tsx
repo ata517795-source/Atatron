@@ -280,16 +280,16 @@ export function AstroMapView() {
 
       {tip && (
         <div
-          className="pointer-events-none absolute z-10 rounded-lg border border-amber-glow/50 bg-dusk-900/95 px-3 py-1 text-sm font-extrabold text-gold-300"
+          className="pointer-events-none absolute z-10 rounded-lg border border-gold-400/50 bg-ink-900/95 px-3 py-1 text-sm font-extrabold text-gold-300"
           style={{ left: tip.x + 14, top: tip.y - 36 }}
         >
           ✦ {tip.text}
         </div>
       )}
 
-      <div className="pointer-events-none absolute bottom-4 left-1/2 -translate-x-1/2 rounded-full bg-dusk-900/80 px-4 py-1.5 text-xs font-bold text-gold-300/90 backdrop-blur">
+      <div className="pointer-events-none absolute bottom-4 left-1/2 -translate-x-1/2 rounded-full bg-ink-900/80 px-4 py-1.5 text-xs font-bold text-gold-300/90 backdrop-blur">
         Astro chart — drag to spin the wheel · Click a constellation-country ·{' '}
-        <kbd className="text-amber-glow">Z</kbd>/<kbd className="text-amber-glow">X</kbd> zoom
+        <kbd className="text-gold-400">Z</kbd>/<kbd className="text-gold-400">X</kbd> zoom
       </div>
     </div>
   );

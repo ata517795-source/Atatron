@@ -71,11 +71,11 @@ export function Celebration() {
   }, []);
 
   return (
-    <div className="absolute inset-0 z-60 flex items-center justify-center bg-dusk-950/92 backdrop-blur">
+    <div className="absolute inset-0 z-60 flex items-center justify-center bg-ink-950/92 backdrop-blur">
       <ConfettiCanvas />
-      <div className="relative z-10 mx-4 max-w-xl animate-pop-in rounded-3xl border border-gold-400/40 bg-dusk-900/95 p-10 text-center shadow-[0_0_120px_rgba(255,209,102,0.35)]">
+      <div className="relative z-10 mx-4 max-w-xl animate-pop-in rounded-3xl border border-gold-400/40 bg-ink-900/95 p-10 text-center shadow-[0_0_120px_rgba(255,209,102,0.35)]">
         <div className="text-7xl" aria-hidden>🏆</div>
-        <h2 className="mt-3 font-display text-5xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-gold-300 via-coral-300 to-amber-glow">
+        <h2 className="mt-3 font-display text-5xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-gold-300 via-clay-300 to-gold-400">
           You've seen the world!
         </h2>
         <p className="mt-4 text-lg font-bold text-white/85">
@@ -93,13 +93,13 @@ export function Celebration() {
               setCelebrationOpen(false);
               setAlbumOpen(true);
             }}
-            className="rounded-2xl bg-gradient-to-r from-coral-500 to-amber-glow px-6 py-3 font-display text-lg font-extrabold text-dusk-950 shadow-lg transition hover:scale-105"
+            className="rounded-2xl bg-gradient-to-r from-clay-500 to-gold-400 px-6 py-3 font-display text-lg font-extrabold text-ink-950 shadow-lg transition hover:scale-105"
           >
             📸 See your album
           </button>
           <button
             onClick={() => setCelebrationOpen(false)}
-            className="rounded-2xl bg-dusk-700 px-6 py-3 font-display text-lg font-extrabold text-white/85 transition hover:bg-dusk-600"
+            className="rounded-2xl bg-ink-700 px-6 py-3 font-display text-lg font-extrabold text-white/85 transition hover:bg-ink-600"
           >
             Keep exploring 🌏
           </button>

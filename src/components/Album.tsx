@@ -46,7 +46,7 @@ function Polaroid({ meta, index }: { meta: PhotoMeta; index: number }) {
           <a
             href={dataUrl}
             download={photoFileName(meta)}
-            className="rounded-md bg-dusk-900/85 px-1.5 py-0.5 text-xs"
+            className="rounded-md bg-ink-900/85 px-1.5 py-0.5 text-xs"
             title="Download photo"
           >
             ⬇️
@@ -58,7 +58,7 @@ function Polaroid({ meta, index }: { meta: PhotoMeta; index: number }) {
             removePhoto(meta.id);
             sfx.click();
           }}
-          className="rounded-md bg-dusk-900/85 px-1.5 py-0.5 text-xs"
+          className="rounded-md bg-ink-900/85 px-1.5 py-0.5 text-xs"
           title="Delete photo"
         >
           🗑️
@@ -82,16 +82,16 @@ export function Album() {
   const progress = Math.min(100, (photos.length / PHOTO_GOAL) * 100);
 
   return (
-    <div className="absolute inset-0 z-50 flex flex-col bg-dusk-950/97 backdrop-blur">
-      <header className="flex flex-wrap items-center gap-3 border-b border-amber-glow/25 p-4">
-        <h2 className="font-display text-2xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-gold-400 to-coral-400">
+    <div className="absolute inset-0 z-50 flex flex-col bg-ink-950/97 backdrop-blur">
+      <header className="flex flex-wrap items-center gap-3 border-b border-gold-400/25 p-4">
+        <h2 className="font-display text-2xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-gold-400 to-clay-400">
           📸 Your World Album
         </h2>
         <div className="flex items-center gap-2 text-sm font-extrabold text-gold-300">
           {photos.length}/{PHOTO_GOAL}
-          <span className="h-2 w-40 overflow-hidden rounded-full bg-dusk-800">
+          <span className="h-2 w-40 overflow-hidden rounded-full bg-ink-800">
             <span
-              className="block h-full rounded-full bg-gradient-to-r from-coral-500 to-gold-400 transition-all"
+              className="block h-full rounded-full bg-gradient-to-r from-clay-500 to-gold-400 transition-all"
               style={{ width: `${progress}%` }}
             />
           </span>
@@ -100,7 +100,7 @@ export function Album() {
         <select
           value={countryFilter}
           onChange={(e) => setCountryFilter(e.target.value)}
-          className="ml-auto rounded-full border border-dusk-500 bg-dusk-800 px-3 py-1.5 text-sm font-bold text-white/85 outline-none"
+          className="ml-auto rounded-full border border-ink-600 bg-ink-800 px-3 py-1.5 text-sm font-bold text-white/85 outline-none"
           aria-label="Filter by country"
         >
           <option value="all">All countries</option>
@@ -112,7 +112,7 @@ export function Album() {
         </select>
         <button
           onClick={() => setAlbumOpen(false)}
-          className="rounded-full bg-white/10 px-3 py-1.5 text-sm font-black text-white/75 transition hover:bg-coral-500/40 hover:text-white"
+          className="rounded-full bg-white/10 px-3 py-1.5 text-sm font-black text-white/75 transition hover:bg-clay-500/40 hover:text-white"
         >
           ✕ Close
         </button>
@@ -124,7 +124,7 @@ export function Album() {
             <div className="animate-float text-7xl" aria-hidden>📷</div>
             <p className="font-display text-2xl font-extrabold text-gold-300">No photos yet!</p>
             <p className="max-w-md text-sm font-semibold text-white/55">
-              Click a country, hit <span className="text-coral-300">GO!</span>, and press the shutter to start
+              Click a country, hit <span className="text-clay-300">GO!</span>, and press the shutter to start
               filling your album. {PHOTO_GOAL} photos and you've seen the world! 🌍
             </p>
           </div>

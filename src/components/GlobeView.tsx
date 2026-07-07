@@ -42,12 +42,12 @@ export function GlobeView() {
     const globe = new Globe(el, { animateIn: true })
       .backgroundColor('rgba(0,0,0,0)')
       .showAtmosphere(true)
-      .atmosphereColor('#ff9d6f')
-      .atmosphereAltitude(0.16)
+      .atmosphereColor('#d3b277')
+      .atmosphereAltitude(0.15)
       .polygonsData(WORLD_FEATURES as unknown as object[])
       .polygonCapColor(capColor)
-      .polygonSideColor(() => 'rgba(12, 18, 51, 0.72)')
-      .polygonStrokeColor(() => 'rgba(7, 11, 36, 0.9)')
+      .polygonSideColor(() => 'rgba(12, 20, 26, 0.72)')
+      .polygonStrokeColor(() => 'rgba(8, 14, 18, 0.9)')
       .polygonAltitude(altitude)
       .polygonsTransitionDuration(220)
       .polygonLabel((obj: object) => {
@@ -70,7 +70,7 @@ export function GlobeView() {
         globe.pointOfView({ lat: c.latlng[0], lng: c.latlng[1], altitude: 1.6 }, 850);
       });
 
-    globe.globeMaterial().color.set('#10225c');
+    globe.globeMaterial().color.set('#152730');
     globe.pointOfView({ lat: 18, lng: 12, altitude: 2.2 }, 0);
     globe.controls().autoRotate = true;
     globe.controls().autoRotateSpeed = 0.45;
@@ -106,11 +106,11 @@ export function GlobeView() {
   }, []);
 
   return (
-    <div className="relative h-full w-full bg-gradient-to-b from-dusk-950 via-dusk-900 to-[#1a1038]">
+    <div className="relative h-full w-full bg-gradient-to-b from-ink-950 via-ink-900 to-[#1a1038]">
       <Starfield />
       <div ref={containerRef} className="h-full w-full" />
-      <div className="pointer-events-none absolute bottom-4 left-1/2 -translate-x-1/2 rounded-full bg-dusk-900/80 px-4 py-1.5 text-xs font-bold text-gold-300/90 backdrop-blur">
-        Drag to spin · Hover for names · Click a country · <kbd className="text-amber-glow">Z</kbd> zoom in · <kbd className="text-amber-glow">X</kbd> zoom out
+      <div className="pointer-events-none absolute bottom-4 left-1/2 -translate-x-1/2 rounded-full bg-ink-900/80 px-4 py-1.5 text-xs font-bold text-gold-300/90 backdrop-blur">
+        Drag to spin · Hover for names · Click a country · <kbd className="text-gold-400">Z</kbd> zoom in · <kbd className="text-gold-400">X</kbd> zoom out
       </div>
     </div>
   );

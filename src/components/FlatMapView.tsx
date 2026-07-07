@@ -100,7 +100,7 @@ export function FlatMapView() {
   return (
     <div
       ref={containerRef}
-      className="relative h-full w-full overflow-hidden bg-gradient-to-b from-dusk-950 via-[#0e1a45] to-[#14103a]"
+      className="relative h-full w-full overflow-hidden bg-gradient-to-b from-ink-950 via-[#0e1a45] to-[#14103a]"
     >
       <svg
         width={size.w}
@@ -164,28 +164,28 @@ export function FlatMapView() {
 
       {tip && (
         <div
-          className="pointer-events-none absolute z-10 rounded-lg border border-amber-glow/50 bg-dusk-900/95 px-3 py-1 text-sm font-extrabold text-gold-300"
+          className="pointer-events-none absolute z-10 rounded-lg border border-gold-400/50 bg-ink-900/95 px-3 py-1 text-sm font-extrabold text-gold-300"
           style={{ left: tip.x + 14, top: tip.y - 36 }}
         >
           {tip.text}
         </div>
       )}
 
-      <div className="pointer-events-none absolute bottom-4 left-1/2 -translate-x-1/2 rounded-full bg-dusk-900/80 px-4 py-1.5 text-xs font-bold text-gold-300/90 backdrop-blur">
-        Drag to pan · Click a country · <kbd className="text-amber-glow">Z</kbd> zoom in ·{' '}
-        <kbd className="text-amber-glow">X</kbd> zoom out
+      <div className="pointer-events-none absolute bottom-4 left-1/2 -translate-x-1/2 rounded-full bg-ink-900/80 px-4 py-1.5 text-xs font-bold text-gold-300/90 backdrop-blur">
+        Drag to pan · Click a country · <kbd className="text-gold-400">Z</kbd> zoom in ·{' '}
+        <kbd className="text-gold-400">X</kbd> zoom out
       </div>
       <div className="absolute right-4 top-4 flex flex-col gap-1">
         <button
           onClick={() => zoomBy(1.35)}
-          className="h-9 w-9 rounded-xl bg-dusk-800/90 text-lg font-black text-gold-300 transition hover:bg-dusk-700"
+          className="h-9 w-9 rounded-xl bg-ink-800/90 text-lg font-black text-gold-300 transition hover:bg-ink-700"
           aria-label="Zoom in"
         >
           +
         </button>
         <button
           onClick={() => zoomBy(1 / 1.35)}
-          className="h-9 w-9 rounded-xl bg-dusk-800/90 text-lg font-black text-gold-300 transition hover:bg-dusk-700"
+          className="h-9 w-9 rounded-xl bg-ink-800/90 text-lg font-black text-gold-300 transition hover:bg-ink-700"
           aria-label="Zoom out"
         >
           −
