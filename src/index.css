@@ -1,0 +1,102 @@
+@import "tailwindcss";
+
+@theme {
+  /* Sunset Explorer palette: warm coral/amber/gold over deep indigo dusk */
+  --color-dusk-950: #070b24;
+  --color-dusk-900: #0c1233;
+  --color-dusk-800: #141b4d;
+  --color-dusk-700: #1e2766;
+  --color-dusk-600: #2a357f;
+  --color-dusk-500: #3b4899;
+
+  --color-coral-300: #ffb3a0;
+  --color-coral-400: #ff8f73;
+  --color-coral-500: #ff6b57;
+  --color-coral-600: #f04e3e;
+
+  --color-amber-glow: #ffb347;
+  --color-gold-300: #ffe29a;
+  --color-gold-400: #ffd166;
+  --color-gold-500: #f4b942;
+
+  --font-display: "Baloo 2", "Nunito", ui-rounded, system-ui, sans-serif;
+  --font-sans: "Nunito", system-ui, -apple-system, sans-serif;
+
+  --animate-fade-in: fade-in 0.35s ease-out both;
+  --animate-pop-in: pop-in 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+  --animate-twinkle: twinkle 2.4s ease-in-out infinite;
+  --animate-shimmer: shimmer 1.4s linear infinite;
+  --animate-float: float 5s ease-in-out infinite;
+
+  @keyframes fade-in {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes pop-in {
+    from { opacity: 0; transform: scale(0.9); }
+    to { opacity: 1; transform: scale(1); }
+  }
+  @keyframes twinkle {
+    0%, 100% { opacity: 0.25; }
+    50% { opacity: 1; }
+  }
+  @keyframes shimmer {
+    from { background-position: -200% 0; }
+    to { background-position: 200% 0; }
+  }
+  @keyframes float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-10px); }
+  }
+}
+
+html, body, #root {
+  height: 100%;
+  overscroll-behavior: none;
+}
+
+body {
+  font-family: var(--font-sans);
+  background: var(--color-dusk-950);
+  color: #f5f0ff;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* skeleton shimmer for loading states */
+.skeleton {
+  border-radius: 0.5rem;
+  background: linear-gradient(
+    100deg,
+    rgba(255, 255, 255, 0.06) 40%,
+    rgba(255, 255, 255, 0.16) 50%,
+    rgba(255, 255, 255, 0.06) 60%
+  );
+  background-size: 200% 100%;
+  animation: var(--animate-shimmer);
+}
+
+/* thin scrollbars that fit the dusk theme */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 179, 71, 0.45) transparent;
+}
+*::-webkit-scrollbar { width: 8px; height: 8px; }
+*::-webkit-scrollbar-thumb { background: rgba(255, 179, 71, 0.35); border-radius: 8px; }
+*::-webkit-scrollbar-track { background: transparent; }
+
+/* teleport flash used when entering a country / teleporting */
+@keyframes teleport-flash {
+  0% { opacity: 1; }
+  100% { opacity: 0; }
+}
+.teleport-flash {
+  animation: teleport-flash 0.9s ease-out both;
+}
+
+@keyframes shutter-flash {
+  0% { opacity: 0.95; }
+  100% { opacity: 0; }
+}
+.shutter-flash {
+  animation: shutter-flash 0.45s ease-out both;
+}

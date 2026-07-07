@@ -1,0 +1,120 @@
+import { useGame, PHOTO_GOAL, type ViewMode } from './store/gameStore';
+import { Landing } from './components/Landing';
+import { GlobeView } from './components/GlobeView';
+import { FlatMapView } from './components/FlatMapView';
+import { AstroMapView } from './components/AstroMapView';
+import { CountryPanel } from './components/CountryPanel';
+import { StreetViewMode } from './components/StreetViewMode';
+import { Album } from './components/Album';
+import { ExplorersPanel } from './components/ExplorersPanel';
+import { Celebration } from './components/Celebration';
+import { AvatarIcon } from './lib/avatars';
+
+const VIEWS: { id: ViewMode; label: string; icon: string }[] = [
+  { id: 'globe', label: 'Globe', icon: '🌍' },
+  { id: 'flat', label: 'Map', icon: '🗺️' },
+  { id: 'astro', label: 'Astro', icon: '✨' },
+];
+
+function WorldScreen() {
+  const player = useGame((s) => s.player)!;
+  const viewMode = useGame((s) => s.viewMode);
+  const setViewMode = useGame((s) => s.setViewMode);
+  const photos = useGame((s) => s.photos);
+  const setAlbumOpen = useGame((s) => s.setAlbumOpen);
+  const setExplorersOpen = useGame((s) => s.setExplorersOpen);
+  const soundOn = useGame((s) => s.soundOn);
+  const toggleSound = useGame((s) => s.toggleSound);
+  const signOut = useGame((s) => s.signOut);
+  const progress = Math.min(100, (photos.length / PHOTO_GOAL) * 100);
+
+  return (
+    <div className="flex h-full flex-col">
+      <header className="z-30 flex items-center gap-3 border-b border-amber-glow/20 bg-dusk-900/90 px-4 py-2 backdrop-blur">
+        <h1 className="font-display text-xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-gold-400 to-coral-400">
+          🌍 Wanderworld
+        </h1>
+
+        <nav className="ml-2 flex rounded-full bg-dusk-800 p-1" aria-label="World view">
+          {VIEWS.map((v) => (
+            <button
+              key={v.id}
+              onClick={() => setViewMode(v.id)}
+              className={`rounded-full px-3.5 py-1 text-sm font-extrabold transition ${
+                viewMode === v.id
+                  ? 'bg-gradient-to-r from-coral-500 to-amber-glow text-dusk-950 shadow'
+                  : 'text-white/60 hover:text-white'
+              }`}
+            >
+              {v.icon} {v.label}
+            </button>
+          ))}
+        </nav>
+
+        <div className="ml-auto flex items-center gap-2">
+          <button
+            onClick={() => setAlbumOpen(true)}
+            className="group flex items-center gap-2 rounded-full bg-dusk-800 px-3 py-1.5 text-sm font-extrabold text-gold-300 transition hover:bg-dusk-700"
+            title="Open your photo album"
+          >
+            📸 {photos.length}/{PHOTO_GOAL}
+            <span className="h-1.5 w-16 overflow-hidden rounded-full bg-dusk-950">
+              <span
+                className="block h-full rounded-full bg-gradient-to-r from-coral-500 to-gold-400 transition-all"
+                style={{ width: `${progress}%` }}
+              />
+            </span>
+          </button>
+          <button
+            onClick={() => setExplorersOpen(true)}
+            className="rounded-full bg-dusk-800 px-3 py-1.5 text-sm font-extrabold text-white/70 transition hover:bg-dusk-700 hover:text-white"
+            title="Explorers"
+          >
+            🧑‍🤝‍🧑 Explorers
+          </button>
+          <button
+            onClick={toggleSound}
+            className="rounded-full bg-dusk-800 px-2.5 py-1.5 text-sm transition hover:bg-dusk-700"
+            title={soundOn ? 'Mute sounds' : 'Unmute sounds'}
+          >
+            {soundOn ? '🔊' : '🔇'}
+          </button>
+          <button
+            onClick={signOut}
+            className="flex items-center gap-2 rounded-full bg-dusk-800 py-1 pl-1 pr-3 transition hover:bg-dusk-700"
+            title={`${player.nickname} — click to sign out`}
+          >
+            <AvatarIcon id={player.avatarId} size={26} />
+            <span className="max-w-28 truncate text-sm font-extrabold text-white/85">{player.nickname}</span>
+          </button>
+        </div>
+      </header>
+
+      <main className="relative min-h-0 flex-1">
+        {viewMode === 'globe' && <GlobeView />}
+        {viewMode === 'flat' && <FlatMapView />}
+        {viewMode === 'astro' && <AstroMapView />}
+        <CountryPanel />
+      </main>
+    </div>
+  );
+}
+
+export default function App() {
+  const player = useGame((s) => s.player);
+  const insideCca3 = useGame((s) => s.insideCca3);
+  const albumOpen = useGame((s) => s.albumOpen);
+  const explorersOpen = useGame((s) => s.explorersOpen);
+  const celebrationOpen = useGame((s) => s.celebrationOpen);
+
+  if (!player) return <Landing />;
+  return (
+    <div className="h-full">
+      <WorldScreen />
+      {insideCca3 && <StreetViewMode key={insideCca3} cca3={insideCca3} />}
+      {albumOpen && <Album />}
+      {explorersOpen && <ExplorersPanel />}
+      {celebrationOpen && <Celebration />}
+    </div>
+  );
+}
