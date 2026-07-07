@@ -67,20 +67,28 @@ export async function sparql(query: string): Promise<Binding[]> {
     await acquire();
     try {
       const url = `${ENDPOINT}?format=json&query=${encodeURIComponent(query)}`;
-      const controller = new AbortController();
-      const timer = setTimeout(() => controller.abort(), 55_000);
-      try {
-        const res = await fetch(url, {
-          headers: { Accept: 'application/sparql-results+json' },
-          signal: controller.signal,
-        });
-        if (!res.ok) throw new Error(`Wikidata SPARQL ${res.status}`);
-        const data = await res.json();
-        const rows: Binding[] = data.results.bindings;
-        writeCache(key, rows);
-        return rows;
-      } finally {
-        clearTimeout(timer);
+      // one polite retry when the public endpoint rate-limits us (429)
+      for (let attempt = 0; ; attempt++) {
+        const controller = new AbortController();
+        const timer = setTimeout(() => controller.abort(), 55_000);
+        try {
+          const res = await fetch(url, {
+            headers: { Accept: 'application/sparql-results+json' },
+            signal: controller.signal,
+          });
+          if (res.status === 429 && attempt === 0) {
+            const wait = Number(res.headers.get('Retry-After')) || 3;
+            await new Promise((r) => setTimeout(r, Math.min(wait, 15) * 1000));
+            continue;
+          }
+          if (!res.ok) throw new Error(`Wikidata SPARQL ${res.status}`);
+          const data = await res.json();
+          const rows: Binding[] = data.results.bindings;
+          writeCache(key, rows);
+          return rows;
+        } finally {
+          clearTimeout(timer);
+        }
       }
     } finally {
       release();
