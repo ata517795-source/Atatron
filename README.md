@@ -1,11 +1,19 @@
 # 🌍 Wanderworld
 
 A joyful browser game where you roam a colorful interactive Earth, **step into real
-countries via live Google Street View**, and fill a photo album with **50 real
-snapshots of the world**.
+countries** and fill a photo album with **50 real snapshots of the world**.
 
 Built with React + Vite + TypeScript, Tailwind CSS, Zustand, globe.gl (three.js),
 D3-geo, the Google Maps JavaScript API, and optional Supabase.
+
+> ### 🆓 Free to run and free to deploy — no card, no paid keys
+> Wanderworld is **fully playable with zero API keys and zero cost.** With no
+> Google Maps key, "GO!" mode explores real landmark photographs from Wikimedia
+> Commons instead of Street View — the globe, all three world maps, live country
+> facts, the camera, and the photo album all work exactly the same. You can ship
+> a public link on a free host (see [Deploying](#deploying-a-public-link)) without
+> ever entering payment details. The Google Maps key is an **optional upgrade**
+> you can add later to unlock walkable Street View.
 
 ---
 
@@ -147,12 +155,15 @@ The app is a static Vite build — any static host works.
 ### Vercel (recommended)
 
 1. Push this repo to GitHub.
-2. [vercel.com](https://vercel.com) → **Add New → Project** → import the repo.
-   Vercel auto-detects Vite (build `npm run build`, output `dist`) — accept.
-3. In **Settings → Environment Variables**, add the vars from the table above
-   (at minimum `VITE_GOOGLE_MAPS_API_KEY` for Street View).
-4. **Deploy** → you get `https://your-project.vercel.app`. Add that domain to
-   your Google Maps key's referrer restrictions.
+2. [vercel.com](https://vercel.com) → sign in with GitHub (free **Hobby** plan,
+   no card) → **Add New → Project** → import the repo. Vercel auto-detects Vite
+   (build `npm run build`, output `dist`) — accept.
+3. **Environment variables are optional.** Leave them empty for a free public
+   link that runs in Wikimedia photo mode. Later, if you want walkable Street
+   View, add `VITE_GOOGLE_MAPS_API_KEY` under **Settings → Environment Variables**
+   and redeploy.
+4. **Deploy** → you get `https://your-project.vercel.app`. (If you add a Google
+   Maps key later, restrict it to that domain under HTTP referrers.)
 
 CLI alternative: `npm i -g vercel && vercel --prod`.
 
