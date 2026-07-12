@@ -22,11 +22,11 @@ export function buildSeed(): { habits: Habit[]; transactions: Transaction[]; goa
 
   // ---- Habits: consistency improves over time (the 1% story) ----
   const defs: Array<Partial<Habit> & { nama: string; baseP: number; gainP: number }> = [
-    { nama: 'Lari Pagi', frekuensi: { type: 'mingguan', kali: 4 }, waktuEksekusi: '05:30', icon: '🏃', color: '#eb6834', sport: true, baseP: 0.5, gainP: 0.35 },
-    { nama: 'Baca Buku 20 Menit', frekuensi: { type: 'harian' }, waktuEksekusi: '21:00', icon: '📚', color: '#3987e5', baseP: 0.55, gainP: 0.3 },
-    { nama: 'Meditasi', frekuensi: { type: 'harian' }, waktuEksekusi: '06:15', icon: '🧘', color: '#9085e9', baseP: 0.45, gainP: 0.35 },
-    { nama: 'Belajar Bahasa Inggris', frekuensi: { type: 'mingguan', kali: 5 }, waktuEksekusi: '19:30', icon: '🗣️', color: '#1baf7a', baseP: 0.5, gainP: 0.3 },
-    { nama: 'Bebas Rokok', kind: 'break', frekuensi: { type: 'harian' }, waktuEksekusi: '08:00', icon: '🚭', color: '#e34948', baseP: 0.6, gainP: 0.38 },
+    { nama: 'Lari Pagi', frekuensi: { type: 'mingguan', kali: 4 }, waktuEksekusi: '05:30', color: '#fc5200', sport: true, baseP: 0.5, gainP: 0.35 },
+    { nama: 'Baca Buku 20 Menit', frekuensi: { type: 'harian' }, waktuEksekusi: '21:00', color: '#3987e5', baseP: 0.55, gainP: 0.3 },
+    { nama: 'Meditasi', frekuensi: { type: 'harian' }, waktuEksekusi: '06:15', color: '#9085e9', baseP: 0.45, gainP: 0.35 },
+    { nama: 'Belajar Bahasa Inggris', frekuensi: { type: 'mingguan', kali: 5 }, waktuEksekusi: '19:30', color: '#1baf7a', baseP: 0.5, gainP: 0.3 },
+    { nama: 'Bebas Rokok', kind: 'break', frekuensi: { type: 'harian' }, waktuEksekusi: '08:00', color: '#e34948', baseP: 0.6, gainP: 0.38 },
   ]
 
   const habits: Habit[] = defs.map((d) => {
@@ -44,8 +44,8 @@ export function buildSeed(): { habits: Habit[]; transactions: Transaction[]; goa
       frekuensi: d.frekuensi ?? { type: 'harian' },
       waktuEksekusi: d.waktuEksekusi ?? '07:00',
       kind: d.kind ?? 'build',
-      icon: d.icon ?? '✨',
-      color: d.color ?? '#eb6834',
+      icon: '',
+      color: d.color ?? '#fc5200',
       sport: d.sport ?? false,
       reminder: true,
       cue: d.nama === 'Lari Pagi' ? 'Alarm 05:20, sepatu sudah di depan pintu' : 'Setelah rutinitas sebelumnya',

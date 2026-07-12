@@ -40,7 +40,7 @@ export function scheduleToday(habits: Habit[], eveningSummary: boolean): void {
       const streak = Object.keys(h.log).length
       timers.push(
         window.setTimeout(
-          () => show(`Waktunya ${h.nama}! 🔥`, `Streak kamu: ${streak} hari. Jangan putus hari ini!`),
+          () => show(`Waktunya ${h.nama}`, `Streak kamu: ${streak} hari. Jangan putus hari ini.`),
           delay,
         ),
       )
@@ -54,7 +54,7 @@ export function scheduleToday(habits: Habit[], eveningSummary: boolean): void {
       timers.push(
         window.setTimeout(() => {
           const pending = habits.filter((h) => !h.archived && !h.log[todayKey()]).length
-          if (pending > 0) show('Ringkasan malam 🌙', `${pending} habit belum di-log hari ini.`)
+          if (pending > 0) show('Ringkasan malam', `${pending} habit belum di-log hari ini.`)
         }, delay),
       )
     }

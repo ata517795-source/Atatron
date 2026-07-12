@@ -4,7 +4,7 @@ import type { Habit } from '../types'
 import { BULAN, BULAN_PENDEK, daysInMonth, makeKey, todayKey, formatTanggalPendek } from '../lib/date'
 import { currentStreak, dailyCompletion, frekuensiLabel, monthlyPercent, movingAverage } from '../lib/habits'
 import { persen } from '../lib/format'
-import { PeriodSelector, Ring, Empty } from './ui'
+import { Empty, Icon, PeriodSelector, Ring } from './ui'
 import { LineChart } from './charts'
 import { HabitForm } from './HabitForm'
 
@@ -32,10 +32,10 @@ export function Habits() {
 
       {active.length === 0 && archived.length === 0 ? (
         <Empty
-          art="🌱"
+          art={<Icon name="flame" size={44} strokeWidth={1.4} />}
           title="Belum ada habit"
-          body="Ayo mulai jadi 1% lebih baik — bangun habit pertamamu!"
-          action={<button className="btn primary" onClick={() => setEditing('new')}>+ Habit Baru</button>}
+          body="Mulai jadi 1% lebih baik — bangun habit pertamamu."
+          action={<button className="btn primary" onClick={() => setEditing('new')}>Habit baru</button>}
         />
       ) : (
         <>
@@ -45,7 +45,7 @@ export function Habits() {
                 <div className="muted">Skor bulan {BULAN[period.month]}</div>
                 <div className="big-number">{persen(overallMonth)}</div>
                 <div className="small" style={{ color: 'var(--ink-2)' }}>
-                  {overallMonth >= 80 ? 'Luar biasa konsisten! 🔥' : overallMonth >= 50 ? 'Terus naik, jangan putus! 💪' : 'Mulai lagi hari ini — 1% saja. 🌱'}
+                  {overallMonth >= 80 ? 'Luar biasa konsisten.' : overallMonth >= 50 ? 'Terus naik — jangan putus.' : 'Mulai lagi hari ini, cukup 1%.'}
                 </div>
               </div>
               <Ring percent={overallMonth} color={ACCENT} size={84} />
@@ -66,8 +66,8 @@ export function Habits() {
                 const doneToday = !!h.log[today]
                 return (
                   <div key={h.id} className="card habit-card" style={{ ['--hcolor' as string]: h.color }}>
-                    <button className="habit-icon" style={{ border: 'none', cursor: 'pointer' }} onClick={() => setEditing(h)} aria-label={`Edit ${h.nama}`}>
-                      {h.icon}
+                    <button className="habit-icon" style={{ cursor: 'pointer' }} onClick={() => setEditing(h)} aria-label={`Edit ${h.nama}`}>
+                      {h.nama.trim()[0]?.toUpperCase()}
                     </button>
                     <div style={{ flex: 1, minWidth: 0 }} onClick={() => setEditing(h)}>
                       <div style={{ fontWeight: 800, fontSize: 15 }}>{h.nama}</div>
@@ -76,8 +76,8 @@ export function Habits() {
                         {h.kind === 'break' && ' · hari bersih'}
                       </div>
                       <div className="row" style={{ gap: 6, marginTop: 5, flexWrap: 'wrap' }}>
-                        <span className="streak-pill">🔥 {st.n} {st.unit}</span>
-                        {h.stravaLog[today] && <span className="strava-pill">🟠 Strava · {h.stravaLog[today]}</span>}
+                        <span className="streak-pill"><Icon name="flame" size={13} strokeWidth={2} /> {st.n} {st.unit}</span>
+                        {h.stravaLog[today] && <span className="strava-pill">Strava · {h.stravaLog[today]}</span>}
                         <span className="muted" style={{ fontSize: 11 }}>{persen(pct)} bulan ini</span>
                       </div>
                     </div>
@@ -96,7 +96,7 @@ export function Habits() {
                   <div className="section-title">Diarsipkan <span className="line" /></div>
                   {archived.map((h) => (
                     <div key={h.id} className="card habit-card" style={{ opacity: 0.65, ['--hcolor' as string]: h.color }}>
-                      <div className="habit-icon">{h.icon}</div>
+                      <div className="habit-icon">{h.nama.trim()[0]?.toUpperCase()}</div>
                       <div style={{ flex: 1 }}>
                         <div style={{ fontWeight: 800 }}>{h.nama}</div>
                         <div className="muted">{frekuensiLabel(h)}</div>
@@ -160,7 +160,11 @@ function YearGrid({ habits, year }: { habits: Habit[]; year: number }) {
           <tbody>
             {habits.map((h) => (
               <tr key={h.id} style={{ ['--hcolor' as string]: h.color }}>
-                <td className="mlabel" title={h.nama}>{h.icon}</td>
+                <td className="mlabel" title={h.nama}>
+                  <span style={{ color: h.color, fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 12 }}>
+                    {h.nama.trim()[0]?.toUpperCase()}
+                  </span>
+                </td>
                 {months.flatMap(({ m, days }) =>
                   Array.from({ length: days }, (_, i) => {
                     const key = makeKey(year, m, i + 1)
@@ -236,7 +240,7 @@ function ProgressChart({ habits }: { habits: Habit[] }) {
         tipLabel={(i) => formatTanggalPendek(days[i])}
       />
       <div className="muted" style={{ marginTop: 10 }}>
-        Garis putus-putus = pertumbuhan majemuk 1% per hari (1,01^hari). Kejar dirimu yang teoretis! 🚀
+        Garis putus-putus = pertumbuhan majemuk 1% per hari (1,01^hari). Kejar dirimu yang teoretis.
       </div>
     </div>
   )

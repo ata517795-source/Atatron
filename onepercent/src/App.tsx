@@ -7,13 +7,13 @@ import { Expenses } from './components/Expenses'
 import { Goals } from './components/Goals'
 import { Settings } from './components/Settings'
 import { Onboarding } from './components/Onboarding'
-import { Celebration, Snackbar } from './components/ui'
+import { Celebration, Icon, Snackbar } from './components/ui'
 
-const TABS: Array<{ id: Tab; label: string; icon: string; accent: string }> = [
-  { id: 'dashboard', label: 'Dashboard', icon: '🏠', accent: 'var(--goals)' },
-  { id: 'habits', label: 'Habits', icon: '🔥', accent: 'var(--habits)' },
-  { id: 'expenses', label: 'Expenses', icon: '💰', accent: 'var(--expenses)' },
-  { id: 'goals', label: 'Goals', icon: '🎯', accent: 'var(--goals)' },
+const TABS: Array<{ id: Tab; label: string; icon: string }> = [
+  { id: 'dashboard', label: 'Beranda', icon: 'pulse' },
+  { id: 'habits', label: 'Habits', icon: 'flame' },
+  { id: 'expenses', label: 'Cashflow', icon: 'wallet' },
+  { id: 'goals', label: 'Goals', icon: 'target' },
 ]
 
 export default function App() {
@@ -50,7 +50,9 @@ export default function App() {
           OnePercent
         </div>
         <div className="header-spacer" />
-        <button className="btn ghost sm" onClick={() => setShowSettings(true)} aria-label="Pengaturan">⚙️</button>
+        <button className="icon-btn" onClick={() => setShowSettings(true)} aria-label="Pengaturan">
+          <Icon name="sliders" size={19} />
+        </button>
       </header>
 
       <main className="main" key={tab}>
@@ -65,10 +67,9 @@ export default function App() {
           <button
             key={t.id}
             className={tab === t.id ? 'active' : ''}
-            style={{ ['--tab-accent' as string]: t.accent }}
             onClick={() => setTab(t.id)}
           >
-            <span className="ticon">{t.icon}</span>
+            <span className="ticon"><Icon name={t.icon} size={21} strokeWidth={tab === t.id ? 2 : 1.7} /></span>
             {t.label}
           </button>
         ))}

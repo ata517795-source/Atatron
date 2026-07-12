@@ -34,14 +34,14 @@ export function Settings({ onClose }: { onClose: () => void }) {
 
       <div className="section-title">Tampilan <span className="line" /></div>
       <div className="setting-row">
-        <span style={{ flex: 1, fontWeight: 700, fontSize: 14 }}>🌙 Mode gelap</span>
+        <span style={{ flex: 1, fontWeight: 600, fontSize: 14 }}>Mode gelap</span>
         <Switch on={settings.theme === 'dark'} onChange={(v) => setSettings({ theme: v ? 'dark' : 'light' })} />
       </div>
 
       <div className="section-title">Alarm & Pengingat <span className="line" /></div>
       <div className="setting-row">
         <div style={{ flex: 1 }}>
-          <div style={{ fontWeight: 700, fontSize: 14 }}>⏰ Notifikasi habit</div>
+          <div style={{ fontWeight: 600, fontSize: 14 }}>Notifikasi habit</div>
           <div className="muted">Pengingat di Waktu Eksekusi tiap habit</div>
         </div>
         <Switch
@@ -50,14 +50,14 @@ export function Settings({ onClose }: { onClose: () => void }) {
             if (v) {
               const ok = await requestPermission()
               setSettings({ remindersEnabled: ok })
-              showSnackbar(ok ? 'Pengingat aktif! ⏰' : 'Izin notifikasi ditolak browser')
+              showSnackbar(ok ? 'Pengingat aktif' : 'Izin notifikasi ditolak browser')
             } else setSettings({ remindersEnabled: false })
           }}
         />
       </div>
       <div className="setting-row">
         <div style={{ flex: 1 }}>
-          <div style={{ fontWeight: 700, fontSize: 14 }}>🌙 Ringkasan malam (20:00)</div>
+          <div style={{ fontWeight: 600, fontSize: 14 }}>Ringkasan malam (20:00)</div>
           <div className="muted">"X habit belum di-log hari ini"</div>
         </div>
         <Switch on={settings.eveningSummary} onChange={(v) => setSettings({ eveningSummary: v })} />
@@ -87,7 +87,7 @@ export function Settings({ onClose }: { onClose: () => void }) {
       <div className="card" style={{ marginBottom: 10 }}>
         <div className="spread">
           <div>
-            <div style={{ fontWeight: 800 }}>🟠 Strava</div>
+            <div style={{ fontWeight: 700 }}>Strava</div>
             <div className="muted">Auto-log habit olahraga dari aktivitas larimu</div>
           </div>
           <Switch
@@ -96,7 +96,7 @@ export function Settings({ onClose }: { onClose: () => void }) {
               setSettings({ stravaConnected: v })
               if (v) {
                 const n = syncStrava()
-                showSnackbar(`Strava terhubung (demo) — ${n} hari aktivitas disinkronkan 🟠`)
+                showSnackbar(`Strava terhubung (demo) — ${n} hari aktivitas disinkronkan`)
               }
             }}
           />
@@ -107,7 +107,7 @@ export function Settings({ onClose }: { onClose: () => void }) {
             style={{ marginTop: 10 }}
             onClick={() => showSnackbar(`Sinkron selesai — ${syncStrava()} hari baru dari Strava`)}
           >
-            🔄 Sinkronkan sekarang
+            Sinkronkan sekarang
           </button>
         )}
         <div className="muted" style={{ marginTop: 8 }}>
@@ -118,14 +118,14 @@ export function Settings({ onClose }: { onClose: () => void }) {
       <div className="card">
         <div className="spread">
           <div>
-            <div style={{ fontWeight: 800 }}>📅 Google Calendar</div>
+            <div style={{ fontWeight: 700 }}>Google Calendar</div>
             <div className="muted">Tampilkan acara hari ini di Dashboard</div>
           </div>
           <Switch
             on={settings.calendarConnected}
             onChange={(v) => {
               setSettings({ calendarConnected: v })
-              if (v) showSnackbar('Calendar terhubung (demo) — acara hari ini tampil di Dashboard 📅')
+              if (v) showSnackbar('Calendar terhubung (demo) — acara hari ini tampil di Beranda')
             }}
           />
         </div>
@@ -135,8 +135,8 @@ export function Settings({ onClose }: { onClose: () => void }) {
       </div>
 
       <div className="section-title">Data <span className="line" /></div>
-      <button className="btn block" onClick={() => { loadDemo(); showSnackbar('Data demo 6 bulan dimuat 🎉'); onClose() }}>
-        🎬 Muat data demo (6 bulan)
+      <button className="btn block" onClick={() => { loadDemo(); showSnackbar('Data demo 6 bulan dimuat'); onClose() }}>
+        Muat data demo (6 bulan)
       </button>
       <button
         className="btn danger block"
@@ -148,7 +148,7 @@ export function Settings({ onClose }: { onClose: () => void }) {
           }
         }}
       >
-        🗑️ Hapus semua data
+        Hapus semua data
       </button>
       <div className="muted" style={{ marginTop: 12, textAlign: 'center' }}>
         OnePercent v0.1 · data tersimpan di perangkatmu (offline-first)

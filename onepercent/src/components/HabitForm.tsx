@@ -6,8 +6,7 @@ import { uid } from '../lib/format'
 import { bestStreak, currentStreak, formationProgress } from '../lib/habits'
 import { Modal, Ring, Switch, xCancel } from './ui'
 
-const ICONS = ['🏃', '📚', '🧘', '💧', '🛏️', '🗣️', '💪', '🥗', '✍️', '🙏', '🚭', '📵', '💰']
-const COLORS = ['#eb6834', '#3987e5', '#199e70', '#c98500', '#9085e9', '#e66767', '#d55181', '#008300']
+const COLORS = ['#fc5200', '#3987e5', '#199e70', '#c98500', '#9085e9', '#e66767', '#d55181', '#008300']
 
 const FREQ_OPTIONS: Array<{ label: string; value: Frequency }> = [
   { label: 'Harian', value: { type: 'harian' } },
@@ -37,7 +36,6 @@ export function HabitForm({ habit, onClose }: { habit: Habit | null; onClose: ()
     return i === -1 ? 0 : i
   })
   const [waktu, setWaktu] = useState(habit?.waktuEksekusi ?? '06:00')
-  const [icon, setIcon] = useState(habit?.icon ?? '🏃')
   const [color, setColor] = useState(habit?.color ?? COLORS[0])
   const [sport, setSport] = useState(habit?.sport ?? false)
   const [reminder, setReminder] = useState(habit?.reminder ?? true)
@@ -56,7 +54,7 @@ export function HabitForm({ habit, onClose }: { habit: Habit | null; onClose: ()
       frekuensi: FREQ_OPTIONS[freqIdx].value,
       waktuEksekusi: waktu,
       kind,
-      icon,
+      icon: habit?.icon ?? '',
       color,
       sport,
       reminder,
@@ -115,8 +113,8 @@ export function HabitForm({ habit, onClose }: { habit: Habit | null; onClose: ()
       <div className="field">
         <label>Jenis</label>
         <div className="seg">
-          <button className={kind === 'build' ? 'active' : ''} onClick={() => setKind('build')}>🌱 Bangun kebiasaan baik</button>
-          <button className={kind === 'break' ? 'active' : ''} onClick={() => setKind('break')}>⛓️‍💥 Putus kebiasaan buruk</button>
+          <button className={kind === 'build' ? 'active' : ''} onClick={() => setKind('build')}>Bangun kebiasaan baik</button>
+          <button className={kind === 'break' ? 'active' : ''} onClick={() => setKind('break')}>Putus kebiasaan buruk</button>
         </div>
         {kind === 'break' && <div className="hint">Untuk kebiasaan buruk, mencentang = satu hari bersih tanpa kebiasaan itu.</div>}
       </div>
@@ -157,24 +155,6 @@ export function HabitForm({ habit, onClose }: { habit: Habit | null; onClose: ()
         </div>
       </div>
 
-      <div className="row" style={{ gap: 10 }}>
-        <div className="field" style={{ flex: 1 }}>
-          <label>Ikon</label>
-          <div className="row" style={{ flexWrap: 'wrap', gap: 6 }}>
-            {ICONS.map((ic) => (
-              <button
-                key={ic}
-                className="btn sm"
-                style={{ fontSize: 18, padding: '6px 9px', background: ic === icon ? 'var(--habits-soft)' : 'var(--surface-2)', border: ic === icon ? '1.5px solid var(--habits)' : '1.5px solid transparent' }}
-                onClick={() => setIcon(ic)}
-              >
-                {ic}
-              </button>
-            ))}
-          </div>
-        </div>
-      </div>
-
       <div className="field">
         <label>Warna</label>
         <div className="row" style={{ gap: 8 }}>
@@ -205,16 +185,16 @@ export function HabitForm({ habit, onClose }: { habit: Habit | null; onClose: ()
       )}
 
       <div className="setting-row">
-        <span style={{ flex: 1, fontWeight: 700, fontSize: 14 }}>🟠 Habit olahraga (auto-log dari Strava)</span>
+        <span style={{ flex: 1, fontWeight: 600, fontSize: 14 }}>Habit olahraga — auto-log dari Strava</span>
         <Switch on={sport} onChange={setSport} />
       </div>
       <div className="setting-row" style={{ marginBottom: 16 }}>
-        <span style={{ flex: 1, fontWeight: 700, fontSize: 14 }}>⏰ Pengingat di Waktu Eksekusi</span>
+        <span style={{ flex: 1, fontWeight: 600, fontSize: 14 }}>Pengingat di Waktu Eksekusi</span>
         <Switch on={reminder} onChange={setReminder} />
       </div>
 
       <button className="btn primary block" onClick={save} disabled={!nama.trim()} style={{ opacity: nama.trim() ? 1 : 0.5 }}>
-        {habit ? 'Simpan Perubahan' : 'Mulai Habit Ini 🌱'}
+        {habit ? 'Simpan perubahan' : 'Mulai habit'}
       </button>
 
       {habit && (
@@ -228,7 +208,7 @@ export function HabitForm({ habit, onClose }: { habit: Habit | null; onClose: ()
               onClose()
             }}
           >
-            🔄 Perbarui
+            Perbarui
           </button>
           <button
             className="btn ghost sm"
@@ -238,7 +218,7 @@ export function HabitForm({ habit, onClose }: { habit: Habit | null; onClose: ()
               onClose()
             }}
           >
-            {habit.archived ? '📤 Aktifkan' : '📦 Arsipkan'}
+            {habit.archived ? 'Aktifkan' : 'Arsipkan'}
           </button>
           <button
             className="btn danger sm"
@@ -248,7 +228,7 @@ export function HabitForm({ habit, onClose }: { habit: Habit | null; onClose: ()
               onClose()
             }}
           >
-            🗑️ Hapus
+            Hapus
           </button>
         </div>
       )}

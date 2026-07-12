@@ -3,13 +3,13 @@ import { useStore } from '../store'
 import { addDays, BULAN, dayOfYear, daysUntil, formatTanggal, fromKey, HARI_PENDEK, sisaWaktuLabel, todayKey } from '../lib/date'
 import { monthlyPercent } from '../lib/habits'
 import { persen, rupiah } from '../lib/format'
-import { CountUp, Empty, Ring } from './ui'
+import { CountUp, Empty, HabitMark, Icon, Ring } from './ui'
 import { progress, HORIZONS } from './Goals'
 
 const DEMO_EVENTS = [
-  { time: '09:00', title: 'Daily standup', cal: true },
-  { time: '13:00', title: 'Review proyek', cal: true },
-  { time: '16:30', title: 'Mentoring', cal: true },
+  { time: '09:00', title: 'Daily standup' },
+  { time: '13:00', title: 'Review proyek' },
+  { time: '16:30', title: 'Mentoring' },
 ]
 
 export function Dashboard() {
@@ -24,7 +24,7 @@ export function Dashboard() {
   const now = fromKey(today)
   const active = habits.filter((h) => !h.archived)
 
-  // consistency score: this year's logged days ÷ scheduled-ish days so far
+  // consistency score: recent logged days ÷ tracked days
   const doy = dayOfYear(today)
   const consistency = useMemo(() => {
     if (active.length === 0) return 0
@@ -42,7 +42,7 @@ export function Dashboard() {
     return (per.reduce((a, b) => a + b, 0) / per.length) * 100
   }, [active, today, doy])
 
-  // streak flame: consecutive days with any log
+  // streak: consecutive days with any log
   const flame = useMemo(() => {
     const anyLog = (d: string) => habits.some((h) => h.log[d])
     let n = 0
@@ -68,14 +68,14 @@ export function Dashboard() {
 
   // today checklist interleaved with calendar events
   const timeline = useMemo(() => {
-    const items: Array<{ time: string; kind: 'habit' | 'event'; habitId?: string; title: string; icon: string; done?: boolean; color?: string; strava?: string }> = []
+    const items: Array<{ time: string; kind: 'habit' | 'event'; habitId?: string; title: string; nama?: string; done?: boolean; color?: string; strava?: string }> = []
     for (const h of active) {
       items.push({
         time: h.waktuEksekusi, kind: 'habit', habitId: h.id, title: h.nama,
-        icon: h.icon, done: !!h.log[today], color: h.color, strava: h.stravaLog[today],
+        nama: h.nama, done: !!h.log[today], color: h.color, strava: h.stravaLog[today],
       })
     }
-    if (settings.calendarConnected) for (const e of DEMO_EVENTS) items.push({ time: e.time, kind: 'event', title: e.title, icon: '📅' })
+    if (settings.calendarConnected) for (const e of DEMO_EVENTS) items.push({ time: e.time, kind: 'event', title: e.title })
     return items.sort((a, b) => a.time.localeCompare(b.time))
   }, [active, settings.calendarConnected, today])
 
@@ -84,18 +84,18 @@ export function Dashboard() {
 
   return (
     <div>
-      <div className="spread" style={{ marginBottom: 12 }}>
+      <div className="spread" style={{ marginBottom: 14 }}>
         <div>
-          <div style={{ fontSize: 20, fontWeight: 800, letterSpacing: '-0.02em' }}>
-            {salam}{settings.userName ? `, ${settings.userName}` : ''} 👋
+          <div style={{ fontSize: 20, fontWeight: 700, letterSpacing: '-0.01em' }}>
+            {salam}{settings.userName ? `, ${settings.userName}` : ''}
           </div>
           <div className="muted">
             {HARI_PENDEK[new Date().getDay()]}, {formatTanggal(today)} · {BULAN[now.getMonth()]} {now.getFullYear()}
           </div>
         </div>
         {flame > 0 && (
-          <div className="streak-pill" style={{ fontSize: 14, padding: '8px 13px' }}>
-            🔥 {flame} hari
+          <div className="streak-pill" style={{ fontSize: 13, padding: '7px 12px' }}>
+            <Icon name="flame" size={15} strokeWidth={2} /> {flame} hari
           </div>
         )}
       </div>
@@ -104,10 +104,10 @@ export function Dashboard() {
 
       {active.length === 0 ? (
         <Empty
-          art="🌱"
-          title="Belum ada habit — ayo mulai jadi 1% lebih baik!"
-          body="Buat habit pertamamu dan mulai kurva pertumbuhanmu hari ini."
-          action={<button className="btn primary" onClick={() => setTab('habits')}>+ Buat Habit Pertama</button>}
+          art={<Icon name="flame" size={44} strokeWidth={1.4} />}
+          title="Belum ada habit"
+          body="Bangun habit pertamamu dan mulai kurva pertumbuhanmu hari ini."
+          action={<button className="btn primary" onClick={() => setTab('habits')}>Buat habit pertama</button>}
         />
       ) : (
         <>
@@ -115,13 +115,17 @@ export function Dashboard() {
           <div className="card" style={{ padding: '6px 14px' }}>
             {timeline.map((item, i) => (
               <div key={i} className="tx-row">
-                <div className="muted" style={{ width: 42, fontWeight: 800, fontVariantNumeric: 'tabular-nums' }}>{item.time}</div>
-                <div className="tx-icon" style={item.color ? { background: `color-mix(in srgb, ${item.color} 16%, transparent)` } : undefined}>{item.icon}</div>
+                <div className="muted" style={{ width: 42, fontWeight: 600, fontVariantNumeric: 'tabular-nums' }}>{item.time}</div>
+                {item.kind === 'habit' ? (
+                  <HabitMark nama={item.nama ?? item.title} color={item.color ?? 'var(--habits)'} />
+                ) : (
+                  <div className="tx-icon" style={{ color: 'var(--ink-3)' }}><Icon name="calendar" size={17} /></div>
+                )}
                 <div style={{ flex: 1, minWidth: 0 }}>
-                  <div style={{ fontWeight: 700, fontSize: 14, textDecoration: item.done ? 'line-through' : 'none', color: item.done ? 'var(--ink-3)' : 'var(--ink)' }}>
+                  <div style={{ fontWeight: 600, fontSize: 14, textDecoration: item.done ? 'line-through' : 'none', color: item.done ? 'var(--ink-3)' : 'var(--ink)' }}>
                     {item.title}
                   </div>
-                  {item.strava && <span className="strava-pill">🟠 Strava · {item.strava}</span>}
+                  {item.strava && <span className="strava-pill">Strava · {item.strava}</span>}
                   {item.kind === 'event' && <span className="muted" style={{ fontSize: 11 }}>Google Calendar</span>}
                 </div>
                 {item.kind === 'habit' && item.habitId && (
@@ -141,8 +145,8 @@ export function Dashboard() {
 
       <div className="stat-grid">
         <button className="stat-tile" style={{ cursor: 'pointer', textAlign: 'left' }} onClick={() => setTab('expenses')}>
-          <div className="k">Nett Cashflow bulan ini</div>
-          <div className={`v ${nett >= 0 ? 'pos' : 'neg'}`} style={{ fontSize: 17 }}>
+          <div className="k">Nett Cashflow</div>
+          <div className={`v ${nett >= 0 ? 'pos' : 'neg'}`} style={{ fontSize: 19 }}>
             <CountUp value={nett} format={rupiah} />
           </div>
         </button>
@@ -150,7 +154,7 @@ export function Dashboard() {
           <Ring percent={monthScore} color="var(--habits)" size={54} stroke={6} />
           <div style={{ textAlign: 'left' }}>
             <div className="k">Habit bulan ini</div>
-            <div style={{ fontWeight: 800 }}>{persen(monthScore)}</div>
+            <div style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 19 }}>{persen(monthScore)}</div>
           </div>
         </button>
       </div>
@@ -159,10 +163,10 @@ export function Dashboard() {
         <>
           <div className="section-title">Goal terdekat <span className="line" /></div>
           {overdue.map((g) => (
-            <button key={g.id} className="card goal-card overdue" style={{ width: '100%', textAlign: 'left', cursor: 'pointer' }} onClick={() => setTab('goals')}>
+            <button key={g.id} className="card goal-card overdue" style={{ width: '100%', textAlign: 'left', cursor: 'pointer', color: 'var(--ink)' }} onClick={() => setTab('goals')}>
               <div className="spread">
-                <span style={{ fontWeight: 800 }}>⚠️ {g.nama}</span>
-                <span className="small" style={{ color: 'var(--critical)', fontWeight: 800 }}>{sisaWaktuLabel(g.tenggatWaktu)}</span>
+                <span style={{ fontWeight: 700 }}>{g.nama}</span>
+                <span className="small" style={{ color: 'var(--critical)', fontWeight: 700 }}>{sisaWaktuLabel(g.tenggatWaktu)}</span>
               </div>
               <div className="muted">Lewat tenggat — selesaikan atau geser tenggatnya.</div>
             </button>
@@ -170,8 +174,8 @@ export function Dashboard() {
           {upcoming.filter((g) => daysUntil(g.tenggatWaktu) >= 0).map((g) => (
             <button key={g.id} className="card" style={{ width: '100%', textAlign: 'left', cursor: 'pointer', color: 'var(--ink)' }} onClick={() => setTab('goals')}>
               <div className="spread">
-                <span style={{ fontWeight: 800, fontSize: 14 }}>🎯 {g.nama}</span>
-                <span className="small" style={{ color: 'var(--goals)', fontWeight: 800 }}>{sisaWaktuLabel(g.tenggatWaktu)}</span>
+                <span style={{ fontWeight: 600, fontSize: 14 }}>{g.nama}</span>
+                <span className="small" style={{ color: 'var(--goals)', fontWeight: 700 }}>{sisaWaktuLabel(g.tenggatWaktu)}</span>
               </div>
               <div className="goal-progress" style={{ margin: '8px 0 2px' }}>
                 <div className="fill" style={{ width: `${progress(g)}%` }} />
@@ -185,7 +189,7 @@ export function Dashboard() {
   )
 }
 
-/** "1% Better" hero: compound curve 1.01^day with your position marker */
+/** hero: compound curve 1.01^day with your position marker */
 function HeroCard({ doy, consistency }: { doy: number; consistency: number }) {
   const W = 320
   const H = 110
@@ -203,24 +207,26 @@ function HeroCard({ doy, consistency }: { doy: number; consistency: number }) {
     <div className="card hero">
       <div className="spread" style={{ position: 'relative', zIndex: 1 }}>
         <div>
-          <div style={{ fontWeight: 800, fontSize: 16 }}>1% lebih baik setiap hari</div>
-          <div className="muted small">1,01³⁶⁵ = 37,8× dalam setahun</div>
+          <div className="hero-kicker">1% lebih baik setiap hari</div>
+          <div className="muted small">1,01^365 = 37,8× dalam setahun</div>
         </div>
         <div style={{ textAlign: 'right' }}>
-          <div style={{ fontWeight: 800, fontSize: 22 }}><CountUp value={consistency} format={(v) => persen(v)} /></div>
-          <div className="muted" style={{ fontSize: 10.5 }}>konsistensimu</div>
+          <div style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 30, lineHeight: 1 }}>
+            <CountUp value={consistency} format={(v) => persen(v)} />
+          </div>
+          <div className="muted" style={{ fontSize: 10.5, letterSpacing: '0.1em', textTransform: 'uppercase' }}>konsistensi</div>
         </div>
       </div>
       <svg viewBox={`0 0 ${W} ${H}`} className="chart-svg" style={{ position: 'relative', zIndex: 1 }}>
-        <path d={`${path} L ${x(days)} ${H} L ${x(0)} ${H} Z`} fill="rgba(247,178,59,0.14)" />
-        <path d={path} fill="none" stroke="#f7b23b" strokeWidth="2.5" strokeLinecap="round" />
-        <line x1={x(doy)} x2={x(doy)} y1={y(doy)} y2={H - 4} stroke="rgba(255,255,255,0.5)" strokeWidth="1" strokeDasharray="3 3" />
-        <circle cx={x(doy)} cy={y(doy)} r="6" fill="#f7b23b" stroke="#2b2073" strokeWidth="2.5" />
-        <text x={Math.min(x(doy) + 8, W - 70)} y={Math.max(y(doy) - 8, 12)} fontSize="10" fontWeight="800" fill="#fff">
-          hari ke-{doy}
+        <path d={`${path} L ${x(days)} ${H} L ${x(0)} ${H} Z`} fill="rgba(252,82,0,0.1)" />
+        <path d={path} fill="none" stroke="var(--habits)" strokeWidth="2.5" strokeLinecap="round" />
+        <line x1={x(doy)} x2={x(doy)} y1={y(doy)} y2={H - 4} stroke="rgba(244,244,242,0.4)" strokeWidth="1" strokeDasharray="3 3" />
+        <circle cx={x(doy)} cy={y(doy)} r="5.5" fill="var(--habits)" stroke="#101013" strokeWidth="2.5" />
+        <text x={Math.min(x(doy) + 8, W - 74)} y={Math.max(y(doy) - 8, 12)} fontSize="10" fontWeight="700" fill="#f4f4f2" letterSpacing="1" fontFamily="var(--font-display)">
+          HARI KE-{doy}
         </text>
-        <text x={x(0)} y={H - 2} fontSize="8.5" fill="rgba(255,255,255,0.55)">Jan</text>
-        <text x={x(days) - 20} y={H - 2} fontSize="8.5" fill="rgba(255,255,255,0.55)">Des</text>
+        <text x={x(0)} y={H - 2} fontSize="8.5" fill="rgba(244,244,242,0.45)">JAN</text>
+        <text x={x(days) - 22} y={H - 2} fontSize="8.5" fill="rgba(244,244,242,0.45)">DES</text>
       </svg>
     </div>
   )

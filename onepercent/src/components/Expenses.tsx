@@ -3,14 +3,14 @@ import { useStore } from '../store'
 import type { Alloc, Transaction } from '../types'
 import { BULAN, BULAN_PENDEK, formatTanggal, todayKey } from '../lib/date'
 import { formatNominalInput, parseNominal, rupiah, rupiahPendek, uid } from '../lib/format'
-import { CountUp, Empty, Modal, PeriodSelector, xCancel } from './ui'
+import { CountUp, Empty, Icon, Modal, PeriodSelector, xCancel } from './ui'
 import { Donut, GroupedBars } from './charts'
 
 const ACCENT = 'var(--expenses)'
-const ALLOC_META: Record<Alloc, { label: string; en: string; color: string; icon: string }> = {
-  kebutuhan: { label: 'Kebutuhan', en: 'Needs', color: 'var(--series-blue)', icon: '🏠' },
-  keinginan: { label: 'Keinginan', en: 'Wants', color: 'var(--series-yellow)', icon: '🎁' },
-  investasi: { label: 'Investasi', en: 'Invest', color: 'var(--series-aqua)', icon: '📈' },
+const ALLOC_META: Record<Alloc, { label: string; en: string; color: string }> = {
+  kebutuhan: { label: 'Kebutuhan', en: 'Needs', color: 'var(--series-blue)' },
+  keinginan: { label: 'Keinginan', en: 'Wants', color: 'var(--series-yellow)' },
+  investasi: { label: 'Investasi', en: 'Invest', color: 'var(--series-aqua)' },
 }
 
 export function Expenses() {
@@ -43,7 +43,7 @@ export function Expenses() {
       label: `${ALLOC_META[a].label} (${ALLOC_META[a].en})`,
       value,
       color: ALLOC_META[a].color,
-      note: `target ${target}% · ${diff === 0 ? 'pas 🎯' : diff > 0 ? `lebih ${diff}%` : `hemat ${-diff}%`}`,
+      note: `target ${target}% · ${diff === 0 ? 'tepat' : diff > 0 ? `lebih ${diff}%` : `hemat ${-diff}%`}`,
     }
   })
 
@@ -93,16 +93,16 @@ export function Expenses() {
           <div className={`v ${nett >= 0 ? 'pos' : 'neg'}`} style={{ fontSize: 27 }}>
             <CountUp value={nett} format={rupiah} />
           </div>
-          <div className="muted">{nett >= 0 ? 'Surplus! Uangmu bekerja untukmu 💪' : 'Defisit — cek pos Keinginan 👀'}</div>
+          <div className="muted">{nett >= 0 ? 'Surplus — uangmu bekerja untukmu.' : 'Defisit — cek pos Keinginan.'}</div>
         </div>
       </div>
 
       {monthTx.length === 0 ? (
         <Empty
-          art="🪙"
+          art={<Icon name="wallet" size={44} strokeWidth={1.4} />}
           title={`Belum ada transaksi di ${BULAN[period.month]}`}
-          body="Catat pemasukan & pengeluaran pertamamu — sadar arus kas itu 1% lebih baik versi dompet."
-          action={<button className="btn primary" onClick={() => setEditing('new')}>+ Catat Transaksi</button>}
+          body="Catat pemasukan & pengeluaran pertamamu — arus kas yang sadar adalah 1% lebih baik versi dompet."
+          action={<button className="btn primary" onClick={() => setEditing('new')}>Catat transaksi</button>}
         />
       ) : (
         <>
@@ -147,7 +147,7 @@ export function Expenses() {
           <div className="filter-row">
             {(['semua', 'pemasukan', 'pengeluaran'] as const).map((j) => (
               <button key={j} className={`chip ${fJenis === j ? 'active' : ''}`} style={{ flex: 'none' }} onClick={() => setFJenis(j)}>
-                {j === 'semua' ? 'Semua' : j === 'pemasukan' ? '↓ Pemasukan' : '↑ Pengeluaran'}
+                {j === 'semua' ? 'Semua' : j === 'pemasukan' ? 'Pemasukan' : 'Pengeluaran'}
               </button>
             ))}
             {(['kebutuhan', 'keinginan', 'investasi'] as const).map((a) => (
@@ -157,14 +157,16 @@ export function Expenses() {
             ))}
           </div>
           <div className="field" style={{ marginBottom: 10 }}>
-            <input placeholder="🔎 Cari kategori / catatan…" value={search} onChange={(e) => setSearch(e.target.value)} />
+            <input placeholder="Cari kategori / catatan…" value={search} onChange={(e) => setSearch(e.target.value)} />
           </div>
 
           <div className="card" style={{ padding: '4px 14px' }}>
             {filtered.length === 0 && <div className="muted" style={{ padding: 14, textAlign: 'center' }}>Tidak ada yang cocok dengan filter.</div>}
             {filtered.map((t) => (
               <button key={t.id} className="tx-row" style={{ width: '100%', background: 'none', border: 'none', borderBottom: '1px solid var(--border)', color: 'var(--ink)', textAlign: 'left', cursor: 'pointer' }} onClick={() => setEditing(t)}>
-                <div className="tx-icon">{t.jenis === 'pemasukan' ? '💵' : t.alokasi ? ALLOC_META[t.alokasi].icon : '🧾'}</div>
+                <div className="tx-icon" style={{ color: t.jenis === 'pemasukan' ? 'var(--good)' : 'var(--ink-3)' }}>
+                  <Icon name={t.jenis === 'pemasukan' ? 'arrowIn' : 'arrowOut'} size={17} strokeWidth={2} />
+                </div>
                 <div style={{ flex: 1, minWidth: 0 }}>
                   <div className="row" style={{ gap: 6 }}>
                     <span style={{ fontWeight: 800, fontSize: 14 }}>{t.kategori}</span>
@@ -225,8 +227,8 @@ function TxForm({ tx, onClose }: { tx: Transaction | null; onClose: () => void }
     <Modal title={tx ? 'Ubah Transaksi' : 'Catat Transaksi'} sub='Ketik "X" di kolom nominal untuk membatalkan.' onClose={onClose}>
       <div className="field">
         <div className="seg">
-          <button className={jenis === 'pemasukan' ? 'active' : ''} style={{ ['--accent' as string]: 'var(--series-aqua)' }} onClick={() => { setJenis('pemasukan'); setKategori('') }}>💵 Pemasukan</button>
-          <button className={jenis === 'pengeluaran' ? 'active' : ''} style={{ ['--accent' as string]: 'var(--series-red)' }} onClick={() => { setJenis('pengeluaran'); setKategori('') }}>🧾 Pengeluaran</button>
+          <button className={jenis === 'pemasukan' ? 'active' : ''} style={{ ['--accent' as string]: 'var(--series-aqua)' }} onClick={() => { setJenis('pemasukan'); setKategori('') }}>Pemasukan</button>
+          <button className={jenis === 'pengeluaran' ? 'active' : ''} style={{ ['--accent' as string]: 'var(--series-red)' }} onClick={() => { setJenis('pengeluaran'); setKategori('') }}>Pengeluaran</button>
         </div>
       </div>
 
@@ -305,11 +307,11 @@ function TxForm({ tx, onClose }: { tx: Transaction | null; onClose: () => void }
       </div>
 
       <button className="btn primary block" style={{ ['--accent' as string]: ACCENT }} onClick={save} disabled={!parseNominal(nominal)}>
-        {tx ? 'Simpan Perubahan' : 'Simpan Transaksi 💾'}
+        {tx ? 'Simpan perubahan' : 'Simpan transaksi'}
       </button>
       {tx && (
         <button className="btn danger block" style={{ marginTop: 10 }} onClick={() => { del(tx.id); onClose() }}>
-          🗑️ Hapus Transaksi
+          Hapus transaksi
         </button>
       )}
     </Modal>

@@ -150,7 +150,7 @@ export const useStore = create<State>()(
           }),
         }))
         if (milestone) {
-          get().celebrate(`🔥 Streak ${milestone} hari! Kamu ${milestone >= 66 ? 'sudah membentuk habit ini' : 'makin dekat jadi 1% lebih baik'}.`)
+          get().celebrate(`Streak ${milestone} hari. Kamu ${milestone >= 66 ? 'sudah membentuk habit ini' : 'makin dekat jadi 1% lebih baik'}.`)
         }
       },
 
@@ -212,7 +212,7 @@ export const useStore = create<State>()(
             return next
           }),
         }))
-        if (finished !== null) get().celebrate(`🏆 Goal "${(finished as Goal).nama}" tercapai! Masuk Hall of Fame.`)
+        if (finished !== null) get().celebrate(`Goal "${(finished as Goal).nama}" tercapai — masuk Hall of Fame.`)
       },
 
       finishGoal: (goalId) => {
@@ -230,7 +230,7 @@ export const useStore = create<State>()(
               : x,
           ),
         }))
-        get().celebrate(`🏆 Goal "${g.nama}" tercapai! Masuk Hall of Fame.`)
+        get().celebrate(`Goal "${g.nama}" tercapai — masuk Hall of Fame.`)
       },
 
       /**

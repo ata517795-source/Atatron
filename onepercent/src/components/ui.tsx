@@ -2,6 +2,82 @@ import { useEffect, useRef, useState, type ReactNode } from 'react'
 import { useStore } from '../store'
 import { BULAN_PENDEK } from '../lib/date'
 
+/* ---------- icon system: stroked 24x24 SVGs, no emoji ---------- */
+const PATHS: Record<string, ReactNode> = {
+  pulse: <path d="M3 12h4l2.5-7 5 14 2.5-7h4" />,
+  flame: (
+    <path d="M12 22c4.4 0 7-3 7-6.8 0-4.8-3.8-6.7-5.2-10.7-.6 2-2 3.4-3.6 5C8.2 11.4 5 12.8 5 15.7 5 19 7.6 22 12 22zM12 22c-2 0-3.2-1.5-3.2-3.2 0-1.9 1.4-2.7 2.2-4.6.9 1 2.9 1.9 2.9 4.3 0 1.8-.9 3.5-1.9 3.5z" />
+  ),
+  wallet: (
+    <>
+      <path d="M19 7V5a1.5 1.5 0 0 0-1.5-1.5H5A2 2 0 0 0 3 5.5V18a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2H5" />
+      <circle cx="16.5" cy="13.5" r="1" fill="currentColor" stroke="none" />
+    </>
+  ),
+  target: (
+    <>
+      <circle cx="12" cy="12" r="8.5" />
+      <circle cx="12" cy="12" r="4.5" />
+      <circle cx="12" cy="12" r="1" fill="currentColor" stroke="none" />
+    </>
+  ),
+  sliders: (
+    <>
+      <path d="M4 7h16M4 12h16M4 17h16" />
+      <circle cx="14.5" cy="7" r="2" fill="var(--surface)" />
+      <circle cx="8.5" cy="12" r="2" fill="var(--surface)" />
+      <circle cx="16.5" cy="17" r="2" fill="var(--surface)" />
+    </>
+  ),
+  calendar: (
+    <>
+      <rect x="4" y="5" width="16" height="15" rx="2" />
+      <path d="M4 10h16M8 3v4M16 3v4" />
+    </>
+  ),
+  trophy: (
+    <>
+      <path d="M7.5 3.5h9V10a4.5 4.5 0 0 1-9 0V3.5z" />
+      <path d="M7.5 5.5H4.5a3 3 0 0 0 3 3.7M16.5 5.5h3a3 3 0 0 1-3 3.7" />
+      <path d="M12 14.5v3.5M8.5 21h7M10 21v-3h4v3" />
+    </>
+  ),
+  trending: <path d="M3 17.5l5.5-5.5 3.5 3.5L20 8M15.5 8H20v4.5" />,
+  repeat: (
+    <path d="M17 2.5l3.5 3.5L17 9.5M20.5 6H8a5 5 0 0 0-5 5M7 21.5L3.5 18 7 14.5M3.5 18H16a5 5 0 0 0 5-5" />
+  ),
+  arrowIn: <path d="M17 7L7 17M7 9.5V17h7.5" />,
+  arrowOut: <path d="M7 17L17 7M9.5 7H17v7.5" />,
+  check: <path d="M4.5 12.5l5 5L19.5 7" />,
+}
+
+export function Icon({ name, size = 22, strokeWidth = 1.8, style }: {
+  name: keyof typeof PATHS & string
+  size?: number
+  strokeWidth?: number
+  style?: React.CSSProperties
+}) {
+  return (
+    <svg
+      width={size} height={size} viewBox="0 0 24 24"
+      fill="none" stroke="currentColor" strokeWidth={strokeWidth}
+      strokeLinecap="round" strokeLinejoin="round"
+      style={style} aria-hidden
+    >
+      {PATHS[name]}
+    </svg>
+  )
+}
+
+/** monogram tile for a habit: first letter, habit color */
+export function HabitMark({ nama, color, sm }: { nama: string; color: string; sm?: boolean }) {
+  return (
+    <span className={`habit-icon ${sm ? 'sm' : ''}`} style={{ ['--hcolor' as string]: color }}>
+      {(nama.trim()[0] ?? '·').toUpperCase()}
+    </span>
+  )
+}
+
 /* ---------- X-to-cancel convention ----------
    Any form field: typing exactly "X" (or "x") discards the entry.
    Non-empty forms ask for confirmation first. */
@@ -59,8 +135,8 @@ export function Ring({ percent, size = 74, stroke = 8, color, label, sublabel }:
         />
       </svg>
       <div className="ring-label">
-        <div style={{ fontSize: size / 4.6 }}>{label ?? `${Math.round(percent)}%`}</div>
-        {sublabel && <div className="muted" style={{ fontSize: 10 }}>{sublabel}</div>}
+        <div style={{ fontSize: size / 4.2 }}>{label ?? `${Math.round(percent)}%`}</div>
+        {sublabel && <div className="muted" style={{ fontSize: 10, fontFamily: 'var(--font)', fontWeight: 500 }}>{sublabel}</div>}
       </div>
     </div>
   )
@@ -150,23 +226,25 @@ export function Celebration() {
   return (
     <div className="celebration" onClick={dismiss}>
       <div className="box">
-        <span className="emoji">🎉</span>
-        <p style={{ fontWeight: 800, fontSize: 17, lineHeight: 1.45 }}>{celebration}</p>
-        <button className="btn primary block" onClick={dismiss}>Lanjut! 🚀</button>
+        <span className="emoji" style={{ color: 'var(--habits)' }}>
+          <Icon name="trophy" size={52} strokeWidth={1.5} />
+        </span>
+        <p style={{ fontWeight: 600, fontSize: 16.5, lineHeight: 1.45 }}>{celebration}</p>
+        <button className="btn primary block" onClick={dismiss}>Lanjut</button>
       </div>
     </div>
   )
 }
 
 export function Empty({ art, title, body, action }: {
-  art: string
+  art: ReactNode
   title: string
   body: string
   action?: ReactNode
 }) {
   return (
     <div className="empty card">
-      <div className="art">{art}</div>
+      <div className="art" style={{ color: 'var(--ink-3)' }}>{art}</div>
       <b>{title}</b>
       <div className="small" style={{ marginBottom: action ? 16 : 0 }}>{body}</div>
       {action}

@@ -3,7 +3,7 @@ import { useStore } from '../store'
 import type { Goal, GoalStatus, Horizon, KeyResult } from '../types'
 import { addDays, daysUntil, formatTanggal, sisaWaktuLabel, todayKey } from '../lib/date'
 import { uid } from '../lib/format'
-import { Empty, Modal, PeriodSelector, xCancel } from './ui'
+import { Empty, Icon, Modal, PeriodSelector, xCancel } from './ui'
 
 const ACCENT = 'var(--goals)'
 
@@ -71,17 +71,17 @@ export function Goals() {
           style={{ flex: 'none', border: '1px solid var(--border)', background: horizon === 'hof' ? 'var(--series-yellow)' : 'var(--chip)', color: horizon === 'hof' ? '#fff' : 'var(--ink-2)', borderRadius: 999, padding: '7px 14px', fontSize: 13, fontWeight: 700, cursor: 'pointer' }}
           onClick={() => setHorizon('hof')}
         >
-          🏆 Hall of Fame{achieved.length ? ` · ${achieved.length}` : ''}
+          Hall of Fame{achieved.length ? ` · ${achieved.length}` : ''}
         </button>
       </div>
 
       {horizon === 'hof' ? (
         achieved.length === 0 ? (
-          <Empty art="🏆" title="Hall of Fame masih kosong" body="Selesaikan goal pertamamu dan pajang trofinya di sini!" />
+          <Empty art={<Icon name="trophy" size={44} strokeWidth={1.4} />} title="Hall of Fame masih kosong" body="Selesaikan goal pertamamu dan pajang trofinya di sini." />
         ) : (
           achieved.map((g) => (
             <div key={g.id} className="card glow-goals" style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
-              <div style={{ fontSize: 34 }}>🏆</div>
+              <div style={{ color: 'var(--series-yellow)' }}><Icon name="trophy" size={30} strokeWidth={1.6} /></div>
               <div style={{ flex: 1 }}>
                 <div style={{ fontWeight: 800 }}>{g.nama}</div>
                 <div className="muted">
@@ -95,10 +95,10 @@ export function Goals() {
         )
       ) : shown.length === 0 ? (
         <Empty
-          art="🎯"
+          art={<Icon name="target" size={44} strokeWidth={1.4} />}
           title={`Belum ada goal ${HORIZONS.find((h) => h.id === horizon)?.label.toLowerCase()}`}
           body="Tulis satu goal yang jelas — dirimu 20 tahun lagi akan berterima kasih."
-          action={<button className="btn primary" onClick={() => setEditing('new')}>+ Tambah Goal</button>}
+          action={<button className="btn primary" onClick={() => setEditing('new')}>Tambah goal</button>}
         />
       ) : (
         shown.map((g) => <GoalCard key={g.id} goal={g} onEdit={() => setEditing(g)} />)
@@ -106,7 +106,7 @@ export function Goals() {
 
       {activeGoals.length > 0 && horizon !== 'hof' && (
         <div className="muted" style={{ textAlign: 'center', marginTop: 4 }}>
-          Geser tab horizon di atas — dari minggu ini sampai 20 tahun ke depan 🛣️
+          Geser tab horizon di atas — dari minggu ini sampai 20 tahun ke depan.
         </div>
       )}
 
@@ -149,8 +149,8 @@ function GoalCard({ goal, onEdit }: { goal: Goal; onEdit: () => void }) {
         </div>
       ))}
       <div className="row" style={{ gap: 8, marginTop: 10 }}>
-        <button className="btn sm ghost" style={{ flex: 1 }} onClick={onEdit}>✏️ Ubah</button>
-        <button className="btn sm primary" style={{ flex: 1 }} onClick={() => finishGoal(goal.id)}>🏁 Selesaikan</button>
+        <button className="btn sm ghost" style={{ flex: 1 }} onClick={onEdit}>Ubah</button>
+        <button className="btn sm primary" style={{ flex: 1 }} onClick={() => finishGoal(goal.id)}>Selesaikan</button>
       </div>
     </div>
   )
@@ -262,11 +262,11 @@ function GoalForm({ goal, defaultHorizon, onClose }: {
       </div>
 
       <button className="btn primary block" onClick={save} disabled={!nama.trim()} style={{ opacity: nama.trim() ? 1 : 0.5 }}>
-        {goal ? 'Simpan Perubahan' : 'Kunci Goal Ini 🎯'}
+        {goal ? 'Simpan perubahan' : 'Simpan goal'}
       </button>
       {goal && (
         <button className="btn danger block" style={{ marginTop: 10 }} onClick={() => { del(goal.id); onClose() }}>
-          🗑️ Hapus Goal
+          Hapus goal
         </button>
       )}
     </Modal>
