@@ -21,6 +21,7 @@ forwarding, no public server, and no tunnel — your laptop just needs internet.
 |---|---|
 | `open youtube` / `open gmail` / `open netflix` | opens the site in your browser |
 | `open spotify` / `open discord` / `open notepad` | launches the desktop app |
+| `play adele hello` | **actually starts playing** that song on Spotify (see setup below) |
 | `search best ramen near me` | runs a web search |
 | `turn the volume up` / `mute` / `pause` / `next song` | media & volume keys |
 | `lock the laptop` / `go to sleep` | locks / sleeps the machine |
@@ -135,6 +136,42 @@ also just say a raw number: _"whatsapp 628123456789 saying hi"_.
 > Note: WhatsApp has no official personal-account API, so hands-free mode drives
 > WhatsApp Web through your browser. If a send ever mistimes, Greg falls back to
 > the pre-filled chat so your message is never lost.
+
+## Playing music on Spotify
+
+**"open spotify" only opens the app.** To actually start a specific song —
+_"play adele hello"_ — Greg needs to talk to the real Spotify API with your
+account authorized. This requires **Spotify Premium** (Spotify's API refuses
+remote playback control for free accounts — there's no way around that).
+
+**1. Create a Spotify app** (one-time, ~2 minutes):
+1. Go to <https://developer.spotify.com/dashboard> and log in.
+2. **Create app** → any name/description.
+3. **Redirect URI**: add exactly `http://127.0.0.1:8888/callback` and save.
+4. Open **Settings** on the app page → copy the **Client ID** and **Client
+   Secret**.
+
+**2. Add them to `.env`:**
+```ini
+SPOTIFY_CLIENT_ID=your_client_id
+SPOTIFY_CLIENT_SECRET=your_client_secret
+SPOTIFY_REDIRECT_URI=http://127.0.0.1:8888/callback
+```
+
+**3. Install the dependency and log in once:**
+```bat
+pip install -r requirements.txt
+python spotify_login.py
+```
+This opens your browser — log in and click **Agree**. It saves a
+`.spotify_cache` file (git-ignored) so Greg never has to ask again.
+
+**4. Try it:** message your bot **`play adele hello`**. Greg opens Spotify if
+it isn't already running, then starts that exact track.
+
+> If a send fails, make sure Spotify is open and logged in on your laptop —
+> Spotify needs an active "device" (the desktop app or web player) to send
+> playback commands to.
 
 ## Keep Greg always on (optional)
 

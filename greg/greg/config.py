@@ -46,6 +46,14 @@ class Config:
 
         self.openai_key: str = os.environ.get("OPENAI_API_KEY", "").strip()
 
+        self.spotify_client_id: str = os.environ.get("SPOTIFY_CLIENT_ID", "").strip()
+        self.spotify_client_secret: str = os.environ.get(
+            "SPOTIFY_CLIENT_SECRET", ""
+        ).strip()
+        self.spotify_redirect_uri: str = os.environ.get(
+            "SPOTIFY_REDIRECT_URI", "http://127.0.0.1:8888/callback"
+        ).strip()
+
         self.allow_shell: bool = os.environ.get(
             "GREG_ALLOW_SHELL", "true"
         ).strip().lower() not in ("false", "0", "no", "off")
@@ -59,6 +67,10 @@ class Config:
     @property
     def brain_enabled(self) -> bool:
         return bool(self.anthropic_key)
+
+    @property
+    def spotify_configured(self) -> bool:
+        return bool(self.spotify_client_id and self.spotify_client_secret)
 
     def problems(self) -> list[str]:
         """Return a list of fatal configuration problems (empty == good to go)."""

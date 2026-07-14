@@ -1,6 +1,7 @@
 # Secrets / personal data — never commit these
 .env
 contacts.json
+.spotify_cache
 
 # Python
 __pycache__/

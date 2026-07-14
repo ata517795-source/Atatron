@@ -6,3 +6,4 @@ anthropic>=0.40       # Greg's brain (Claude turns your words into actions)
 openai>=1.40          # OPTIONAL — Whisper voice-note transcription
 pillow>=10.0          # OPTIONAL — screenshots ("send me a screenshot")
 pywhatkit>=5.4        # OPTIONAL — hands-free WhatsApp sending (needs WhatsApp Web)
+spotipy>=2.24         # OPTIONAL — real Spotify playback ("play adele hello")

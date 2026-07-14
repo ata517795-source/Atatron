@@ -26,7 +26,10 @@ SYSTEM_PROMPT = (
     "ambiguous or potentially destructive (deleting files, shutting down), ask "
     "a quick confirming question before acting. You can chat normally too. "
     "To message someone on WhatsApp use send_whatsapp with a saved contact name "
-    "or a phone number that includes the country code."
+    "or a phone number that includes the country code. When they ask to play a "
+    "specific song or artist, use play_song (it actually starts playback) "
+    "instead of open_app — only use open_app for Spotify if they just want the "
+    "app open with nothing specific to play."
 )
 
 # Tool schema handed to Claude.
@@ -85,6 +88,17 @@ TOOLS = [
         },
     },
     {
+        "name": "play_song",
+        "description": "Play a specific song on Spotify (actually starts playback, "
+        "not just opens the app). `query` is the song/artist to search for, e.g. "
+        "'Adele Hello' or 'Adele'. Requires Spotify Premium and prior authorization.",
+        "input_schema": {
+            "type": "object",
+            "properties": {"query": {"type": "string"}},
+            "required": ["query"],
+        },
+    },
+    {
         "name": "send_whatsapp",
         "description": "Send a WhatsApp message. `contact` is a saved contact name "
         "(from the address book) or a phone number with country code. `message` is "
@@ -124,6 +138,8 @@ def _dispatch(name: str, args: dict, allow_shell: bool) -> ActionResult:
         return actions.system_control(args.get("action", ""), int(args.get("amount", 1)))
     if name == "type_text":
         return actions.type_text(args.get("text", ""))
+    if name == "play_song":
+        return actions.play_spotify(args.get("query", ""))
     if name == "send_whatsapp":
         return actions.send_whatsapp(args.get("contact", ""), args.get("message", ""))
     if name == "run_command":
@@ -199,6 +215,21 @@ class Brain:
 
     def _rule_based(self, text: str) -> ActionResult:
         t = text.strip().lower()
+
+        # Spotify — actually play a track, not just open the app.
+        # Matches: "play adele" · "play adele hello" · "play the song adele" ·
+        #          "open spotify and play adele" · "open my spotify and play adele song"
+        m = re.match(
+            r"^(?:open\s+(?:my\s+)?spotify\s+and\s+play|play\s+the\s+song|play)\s+(.+)$",
+            t,
+        )
+        if m:
+            query = m.group(1).strip()
+            query = re.sub(r"^(?:the\s+)?song\s+", "", query)
+            query = re.sub(r"\s+song$", "", query)
+            query = re.sub(r"\s+on\s+spotify$", "", query)
+            if query:
+                return actions.play_spotify(query)
 
         m = re.match(r"^(?:open|launch|start|go to)\s+(.+)$", t)
         if m:

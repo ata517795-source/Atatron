@@ -19,6 +19,7 @@ from __future__ import annotations
 
 import platform
 import sys
+from pathlib import Path
 
 OK = "✅"
 WARN = "⚠️ "
@@ -58,6 +59,8 @@ def main() -> int:
         ("anthropic", "Greg's Claude brain", True),
         ("openai", "voice notes (optional)", False),
         ("PIL", "screenshots (optional)", False),
+        ("pywhatkit", "hands-free WhatsApp (optional)", False),
+        ("spotipy", "Spotify playback (optional)", False),
     ]:
         try:
             __import__(mod)
@@ -94,6 +97,22 @@ def main() -> int:
         "Voice (Whisper) key present" if cfg.voice_enabled
         else "No OPENAI_API_KEY — voice notes disabled (typing still works)",
     )
+    if cfg.spotify_configured:
+        cache = Path(__file__).resolve().parent / ".spotify_cache"
+        if cache.exists():
+            line(OK, "Spotify authorized — 'play <song>' will start real playback")
+        else:
+            line(
+                WARN,
+                "Spotify credentials set but not authorized yet — run "
+                "'python spotify_login.py' once",
+            )
+    else:
+        line(
+            WARN,
+            "No SPOTIFY_CLIENT_ID/SECRET — 'play <song>' won't start real "
+            "playback (open_app('spotify') still works)",
+        )
 
     # 5. Telegram reachability ----------------------------------------------
     if cfg.telegram_token:

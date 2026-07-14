@@ -395,3 +395,121 @@ def send_whatsapp(contact: str, message: str) -> ActionResult:
         f'Opened WhatsApp to {contact} with "{message}" ready — press Send to '
         f"fire it. (Install pywhatkit for fully hands-free sending.)",
     )
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+#  Spotify — real playback control ("play adele hello")
+#
+#  Opening the app only gets you to the app; actually starting a specific
+#  track needs the Spotify Web API with your account authorized. Run
+#  `python spotify_login.py` ONCE (outside of Telegram) to authorize — that
+#  saves a refresh token to .spotify_cache so nothing here ever blocks
+#  waiting for interactive login. Requires Spotify PREMIUM (Spotify's API
+#  refuses remote playback control for free accounts).
+# ─────────────────────────────────────────────────────────────────────────────
+
+_SPOTIFY_CACHE = Path(__file__).resolve().parent.parent / ".spotify_cache"
+_spotify_client = None  # lazy singleton
+
+
+def _spotify_creds() -> tuple[str, str, str] | None:
+    client_id = os.environ.get("SPOTIFY_CLIENT_ID", "").strip()
+    client_secret = os.environ.get("SPOTIFY_CLIENT_SECRET", "").strip()
+    if not client_id or not client_secret:
+        return None
+    redirect_uri = os.environ.get(
+        "SPOTIFY_REDIRECT_URI", "http://127.0.0.1:8888/callback"
+    ).strip()
+    return client_id, client_secret, redirect_uri
+
+
+def _get_spotify():
+    """Return a ready spotipy client, or None if not authorized yet.
+
+    Never opens a browser or blocks on input — only uses an existing cached
+    token, so this is always safe to call from the Telegram message loop.
+    """
+    global _spotify_client
+    if _spotify_client is not None:
+        return _spotify_client
+    creds = _spotify_creds()
+    if creds is None or not _SPOTIFY_CACHE.exists():
+        return None
+
+    import spotipy
+    from spotipy.oauth2 import SpotifyOAuth
+
+    client_id, client_secret, redirect_uri = creds
+    auth = SpotifyOAuth(
+        client_id=client_id,
+        client_secret=client_secret,
+        redirect_uri=redirect_uri,
+        scope="user-modify-playback-state user-read-playback-state",
+        cache_path=str(_SPOTIFY_CACHE),
+        open_browser=False,
+    )
+    _spotify_client = spotipy.Spotify(auth_manager=auth)
+    return _spotify_client
+
+
+def play_spotify(query: str) -> ActionResult:
+    """Search Spotify for `query` and start playing the first match."""
+    query = (query or "").strip()
+    if not query:
+        return ActionResult(False, "What song should I play?")
+
+    if _spotify_creds() is None:
+        return ActionResult(
+            False,
+            "Spotify playback isn't set up yet — add SPOTIFY_CLIENT_ID and "
+            "SPOTIFY_CLIENT_SECRET to .env (see README's Spotify section).",
+        )
+    if not _SPOTIFY_CACHE.exists():
+        return ActionResult(
+            False,
+            "Spotify isn't authorized yet — on your laptop run "
+            "'python spotify_login.py' once to log in, then try again.",
+        )
+    try:
+        import spotipy  # noqa: F401  (presence check)
+    except ImportError:
+        return ActionResult(False, "Run: pip install -r requirements.txt (needs spotipy)")
+
+    try:
+        sp = _get_spotify()
+
+        devices = sp.devices().get("devices", [])
+        if not devices:
+            open_app("spotify")
+            for _ in range(6):
+                time.sleep(2)
+                devices = sp.devices().get("devices", [])
+                if devices:
+                    break
+        if not devices:
+            return ActionResult(
+                False,
+                "No Spotify device found — open the Spotify app on your "
+                "laptop, make sure you're logged in, then try again.",
+            )
+        device = next((d for d in devices if d.get("is_active")), devices[0])
+
+        results = sp.search(q=query, type="track", limit=1)
+        items = results.get("tracks", {}).get("items", [])
+        if not items:
+            return ActionResult(False, f'Couldn\'t find "{query}" on Spotify.')
+        track = items[0]
+        name = track["name"]
+        artist = ", ".join(a["name"] for a in track["artists"])
+
+        sp.start_playback(device_id=device["id"], uris=[track["uri"]])
+        return ActionResult(True, f'▶️ Playing "{name}" by {artist} on Spotify.')
+    except Exception as exc:  # noqa: BLE001
+        msg = str(exc)
+        if "premium" in msg.lower() or "403" in msg:
+            return ActionResult(
+                False,
+                "Spotify refused playback — this needs a Spotify PREMIUM "
+                "account. Free accounts can't be remote-controlled.",
+            )
+        return ActionResult(False, f"Spotify playback failed: {msg}")
