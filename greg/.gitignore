@@ -1,0 +1,14 @@
+# Secrets — never commit these
+.env
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+env/
+*.egg-info/
+
+# Greg runtime junk
+greg_shot_*.png
+greg_voice_*.ogg
