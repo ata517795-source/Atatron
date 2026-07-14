@@ -25,6 +25,7 @@ forwarding, no public server, and no tunnel — your laptop just needs internet.
 | `turn the volume up` / `mute` / `pause` / `next song` | media & volume keys |
 | `lock the laptop` / `go to sleep` | locks / sleeps the machine |
 | `take a screenshot` | grabs your screen and sends it back to Telegram |
+| `whatsapp mom saying I'm on my way` | sends a WhatsApp message (see below) |
 | `what's my IP?` / `list files on my desktop` | runs a command and replies with the output |
 | _(a voice note saying any of the above)_ | transcribes it, then does it |
 
@@ -98,6 +99,42 @@ You should see `✅ Connected to Telegram as @yourbot. Greg is listening…`.
 Now open Telegram, find your bot, send `/start`, then try **`open youtube`**. 🎉
 
 ---
+
+## Sending WhatsApp messages
+
+Greg can fire off WhatsApp messages for you: _"whatsapp mom saying I'm on my
+way"_, _"text dad: call me"_, _"message ana i'm late"_.
+
+**1. Save your people.** Copy `contacts.example.json` to `contacts.json` and put
+in real names → phone numbers **with country code**, digits only (Indonesia is
+`62`, so `08123…` becomes `628123…`):
+
+```json
+{
+  "mom": "628123456789",
+  "dad": "628198765432"
+}
+```
+
+`contacts.json` is git-ignored, so your numbers stay on your laptop. You can
+also just say a raw number: _"whatsapp 628123456789 saying hi"_.
+
+**2. Choose how it sends:**
+
+- **Pre-filled (default, no setup):** Greg opens the WhatsApp chat with your
+  message already typed — you just press **Send**. Works out of the box.
+- **Fully hands-free (Greg presses Send too):** install the helper and log into
+  WhatsApp Web once:
+  ```bat
+  pip install pywhatkit
+  ```
+  Then open <https://web.whatsapp.com> in your browser and scan the QR code with
+  your phone (WhatsApp → Settings → Linked Devices). Keep that logged in and
+  Greg will send messages without you touching anything.
+
+> Note: WhatsApp has no official personal-account API, so hands-free mode drives
+> WhatsApp Web through your browser. If a send ever mistimes, Greg falls back to
+> the pre-filled chat so your message is never lost.
 
 ## Keep Greg always on (optional)
 

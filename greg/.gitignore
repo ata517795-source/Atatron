@@ -1,5 +1,6 @@
-# Secrets — never commit these
+# Secrets / personal data — never commit these
 .env
+contacts.json
 
 # Python
 __pycache__/

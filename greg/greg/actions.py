@@ -9,15 +9,16 @@ Windows.
 
 from __future__ import annotations
 
+import json
 import os
 import platform
-import shlex
 import subprocess
 import tempfile
 import time
 import urllib.parse
 import webbrowser
-from dataclasses import dataclass, field
+from dataclasses import dataclass
+from pathlib import Path
 
 SYSTEM = platform.system()  # 'Windows', 'Darwin', 'Linux'
 IS_WINDOWS = SYSTEM == "Windows"
@@ -308,3 +309,89 @@ def run_command(command: str, timeout: int = 30) -> ActionResult:
         return ActionResult(False, f"Command timed out after {timeout}s.")
     except Exception as exc:  # noqa: BLE001
         return ActionResult(False, f"Command failed: {exc}")
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+#  WhatsApp — "whatsapp mom saying I'm on my way"
+# ─────────────────────────────────────────────────────────────────────────────
+
+# A name→number address book lives in greg/contacts.json (git-ignored).
+# Numbers must include the country code, digits only, e.g. "6281234567890".
+CONTACTS_FILE = Path(__file__).resolve().parent.parent / "contacts.json"
+
+
+def _clean_number(raw: str) -> str:
+    """Strip everything except digits (drops +, spaces, dashes, brackets)."""
+    return "".join(ch for ch in str(raw) if ch.isdigit())
+
+
+def load_contacts() -> dict[str, str]:
+    if not CONTACTS_FILE.exists():
+        return {}
+    try:
+        data = json.loads(CONTACTS_FILE.read_text(encoding="utf-8"))
+        return {str(k).strip().lower(): _clean_number(v) for k, v in data.items()}
+    except Exception:  # noqa: BLE001 — a broken contacts file shouldn't crash Greg
+        return {}
+
+
+def _resolve_number(contact: str) -> str | None:
+    """Turn a name or raw number into a country-coded digit string."""
+    digits = _clean_number(contact)
+    # If they basically gave us a phone number already, trust it.
+    if digits and len(digits) >= 8 and len(_norm(contact).replace(" ", "")) <= len(digits) + 3:
+        return digits
+    return load_contacts().get(_norm(contact))
+
+
+def send_whatsapp(contact: str, message: str) -> ActionResult:
+    """Send a WhatsApp message to a saved contact (or raw number).
+
+    Tries a fully hands-free send via `pywhatkit` (needs WhatsApp Web logged in).
+    If that isn't installed/available, it opens the chat with the message
+    pre-typed so you only have to hit Send.
+    """
+    message = (message or "").strip()
+    if not message:
+        return ActionResult(False, f"What should I say to {contact}?")
+
+    number = _resolve_number(contact)
+    if not number:
+        known = ", ".join(sorted(load_contacts())) or "(none saved yet)"
+        return ActionResult(
+            False,
+            f"I don't have a number for \"{contact}\". Add it to contacts.json "
+            f"(name → number with country code). Known contacts: {known}.",
+        )
+
+    # 1) Preferred: hands-free send through WhatsApp Web.
+    try:
+        import pywhatkit  # type: ignore
+
+        pywhatkit.sendwhatmsg_instantly(
+            phone_no=f"+{number}",
+            message=message,
+            wait_time=15,
+            tab_close=True,
+            close_time=3,
+        )
+        return ActionResult(True, f'Sent to {contact} on WhatsApp: "{message}"')
+    except ImportError:
+        pass  # pywhatkit not installed — fall through to the pre-filled open
+    except Exception as exc:  # noqa: BLE001 — timing/focus issues, degrade gracefully
+        url = f"https://wa.me/{number}?text={urllib.parse.quote(message)}"
+        webbrowser.open(url)
+        return ActionResult(
+            True,
+            f"Opened WhatsApp to {contact} with the message ready — just press "
+            f"Send. (Auto-send hit a snag: {exc})",
+        )
+
+    # 2) Fallback: open the chat with the text pre-filled; user taps Send.
+    url = f"https://wa.me/{number}?text={urllib.parse.quote(message)}"
+    webbrowser.open(url)
+    return ActionResult(
+        True,
+        f'Opened WhatsApp to {contact} with "{message}" ready — press Send to '
+        f"fire it. (Install pywhatkit for fully hands-free sending.)",
+    )

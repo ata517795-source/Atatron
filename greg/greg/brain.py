@@ -24,7 +24,9 @@ SYSTEM_PROMPT = (
     "like YouTube or Gmail, open the website. Keep replies short and natural, "
     "like a text message. Confirm what you did in a few words. If a request is "
     "ambiguous or potentially destructive (deleting files, shutting down), ask "
-    "a quick confirming question before acting. You can chat normally too."
+    "a quick confirming question before acting. You can chat normally too. "
+    "To message someone on WhatsApp use send_whatsapp with a saved contact name "
+    "or a phone number that includes the country code."
 )
 
 # Tool schema handed to Claude.
@@ -83,6 +85,21 @@ TOOLS = [
         },
     },
     {
+        "name": "send_whatsapp",
+        "description": "Send a WhatsApp message. `contact` is a saved contact name "
+        "(from the address book) or a phone number with country code. `message` is "
+        "the text to send. Use this when the user asks to WhatsApp / message / text "
+        "someone.",
+        "input_schema": {
+            "type": "object",
+            "properties": {
+                "contact": {"type": "string"},
+                "message": {"type": "string"},
+            },
+            "required": ["contact", "message"],
+        },
+    },
+    {
         "name": "run_command",
         "description": "Run a raw shell/PowerShell command on the laptop and return "
         "its output. Powerful — use only when nothing else fits.",
@@ -107,6 +124,8 @@ def _dispatch(name: str, args: dict, allow_shell: bool) -> ActionResult:
         return actions.system_control(args.get("action", ""), int(args.get("amount", 1)))
     if name == "type_text":
         return actions.type_text(args.get("text", ""))
+    if name == "send_whatsapp":
+        return actions.send_whatsapp(args.get("contact", ""), args.get("message", ""))
     if name == "run_command":
         if not allow_shell:
             return ActionResult(False, "Raw commands are disabled (GREG_ALLOW_SHELL=false).")
@@ -194,6 +213,23 @@ class Brain:
         if m:
             return actions.web_search(m.group(1).strip())
 
+        # WhatsApp:  "whatsapp mom saying I'm on my way"
+        #            "text dad: call me"   /   "message ana i'm late"
+        m = re.match(
+            r"^(?:send\s+(?:a\s+)?)?(?:whatsapp|wa|text|message|msg)\s+(?:to\s+)?(.+)$",
+            t,
+        )
+        if m:
+            rest = m.group(1).strip()
+            parts = re.split(r"\s+(?:saying|that says|:)\s+|:\s*", rest, maxsplit=1)
+            if len(parts) == 2 and parts[1].strip():
+                contact, msg = parts[0], parts[1]
+            else:
+                toks = rest.split(maxsplit=1)
+                contact = toks[0]
+                msg = toks[1] if len(toks) > 1 else ""
+            return actions.send_whatsapp(contact.strip(), msg.strip())
+
         if t in ("volume up", "louder", "turn it up"):
             return actions.system_control("volume_up", 3)
         if t in ("volume down", "quieter", "turn it down"):
@@ -217,5 +253,6 @@ class Brain:
             False,
             "I don't have my Claude brain configured, so I only understand simple "
             "commands like: open youtube · search cats · volume up · lock · "
-            "screenshot. Add an ANTHROPIC_API_KEY to unlock full natural language.",
+            "screenshot · whatsapp mom saying hi. Add an ANTHROPIC_API_KEY to "
+            "unlock full natural language.",
         )

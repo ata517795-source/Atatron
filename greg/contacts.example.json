@@ -1,0 +1,6 @@
+{
+  "_comment": "Copy this file to contacts.json and put in your real people. Numbers need the COUNTRY CODE, digits only (Indonesia = 62, so 08123.. becomes 628123..). The + and spaces are optional — Greg strips them.",
+  "mom": "628123456789",
+  "dad": "628198765432",
+  "ana": "60123456789"
+}
