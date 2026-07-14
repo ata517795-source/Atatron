@@ -77,7 +77,17 @@ ANTHROPIC_API_KEY=sk-ant-...
 OPENAI_API_KEY=sk-...        # optional, for voice
 ```
 
-### 6. Start Greg
+### 6. Check your setup (recommended)
+Run the doctor — it verifies you're on Windows, packages are installed, your
+`.env` is right, and Telegram accepts your token, then offers a live test:
+
+```bat
+python doctor.py
+```
+
+Fix anything it flags, then continue.
+
+### 7. Start Greg
 Double-click **`start_greg.bat`**, or run:
 
 ```bat
