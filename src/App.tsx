@@ -80,11 +80,11 @@ export default function App() {
       });
       const data = await res.json().catch(() => null);
       if (!res.ok || !data?.report) {
+        const base =
+          data?.error ?? 'The scan could not be completed. Please check the link and try again.';
         setPhase({
           name: 'error',
-          message:
-            data?.error ??
-            'The scan could not be completed. Please check the link and try again.',
+          message: data?.detail ? `${base}\n\nTechnical detail: ${data.detail}` : base,
         });
         return;
       }
@@ -184,7 +184,7 @@ export default function App() {
         {phase.name === 'error' && (
           <section className="card error-card" role="alert">
             <h2>⚠️ The scan didn't finish</h2>
-            <p>{phase.message}</p>
+            <p style={{ whiteSpace: 'pre-wrap' }}>{phase.message}</p>
           </section>
         )}
 

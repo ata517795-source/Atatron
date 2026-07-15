@@ -182,12 +182,23 @@ export async function POST(request: Request): Promise<Response> {
 
   const client = new Anthropic();
 
+  // Field guide derived from the schema — keeps the model's JSON shape in sync
+  // with ScanReport without using output_config.format (which is incompatible
+  // with the citations that the web tools attach to their results).
+  const fieldGuide = Object.entries(REPORT_SCHEMA.properties)
+    .map(([name, spec]) => `- "${name}": ${(spec as { description: string }).description}`)
+    .join('\n');
+
   const messages: Anthropic.MessageParam[] = [
     {
       role: 'user',
       content:
         `Please investigate this link and produce your safety report:\n\n${url}\n\n` +
-        `Fetch it, follow any redirects to the real destination, check its reputation, and fill in every field of the report.`,
+        `Fetch it, follow any redirects to the real destination, and check its reputation.\n\n` +
+        `When you are finished investigating, reply with ONE JSON object and nothing else ` +
+        `— no explanation, no markdown, no code fences. It must contain exactly these keys:\n\n` +
+        `${fieldGuide}\n\n` +
+        `Every key is required. Use null only where the guidance above allows it.`,
     },
   ];
 
@@ -200,12 +211,6 @@ export async function POST(request: Request): Promise<Response> {
       { type: 'web_fetch_20260209' as const, name: 'web_fetch' as const, max_uses: 6, max_content_tokens: 40000 },
       { type: 'web_search_20260209' as const, name: 'web_search' as const, max_uses: 5 },
     ],
-    output_config: {
-      format: {
-        type: 'json_schema' as const,
-        schema: REPORT_SCHEMA as unknown as Record<string, unknown>,
-      },
-    },
   };
 
   try {
@@ -236,11 +241,12 @@ export async function POST(request: Request): Promise<Response> {
       .join('')
       .trim();
 
-    if (!text) {
-      return json({ error: 'The scan finished without a report. Please try again.' }, 502);
+    const report = extractReport(text);
+    if (!report) {
+      console.error('Could not parse report from model output:', text.slice(0, 500));
+      return json({ error: 'The scan finished but the report was unreadable. Please try again.' }, 502);
     }
 
-    const report = JSON.parse(text) as ScanReport;
     return json({ url, report, model: response.model });
   } catch (error) {
     if (error instanceof Anthropic.AuthenticationError) {
@@ -254,9 +260,48 @@ export async function POST(request: Request): Promise<Response> {
     }
     if (error instanceof Anthropic.APIError) {
       console.error('Anthropic API error', error.status, error.message);
-      return json({ error: 'The scan failed on our side. Please try again in a moment.' }, 502);
+      return json(
+        {
+          error: 'The scan failed while talking to the AI service. Please try again in a moment.',
+          detail: `${error.status ?? ''} ${error.message}`.trim(),
+        },
+        502,
+      );
     }
     console.error('Scan failed', error);
-    return json({ error: 'Something went wrong during the scan. Please try again.' }, 500);
+    return json(
+      {
+        error: 'Something went wrong during the scan. Please try again.',
+        detail: error instanceof Error ? error.message : String(error),
+      },
+      500,
+    );
   }
+}
+
+/** Pull the JSON report out of the model's reply, tolerating stray prose or code fences. */
+function extractReport(text: string): ScanReport | null {
+  if (!text) return null;
+  const candidates: string[] = [];
+
+  const fenced = text.match(/```(?:json)?\s*([\s\S]*?)```/i);
+  if (fenced) candidates.push(fenced[1]);
+
+  const first = text.indexOf('{');
+  const last = text.lastIndexOf('}');
+  if (first !== -1 && last > first) candidates.push(text.slice(first, last + 1));
+
+  candidates.push(text);
+
+  for (const candidate of candidates) {
+    try {
+      const parsed = JSON.parse(candidate.trim());
+      if (parsed && typeof parsed === 'object' && 'verdict' in parsed) {
+        return parsed as ScanReport;
+      }
+    } catch {
+      /* try the next candidate */
+    }
+  }
+  return null;
 }
